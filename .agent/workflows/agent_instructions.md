@@ -31,6 +31,10 @@ This repository is part of a **Fashion Store** platform with a headless architec
 - **Interface Alignment**: Always ensure TypeScript interfaces (e.g., in `lib/java/index.ts` or types directory) perfectly match the JSON response from the Java backend.
 - **Null Safety**: Always handle potentially missing data from the API (especially product images/descriptions) to prevent UI crashes.
 
+### 4. Automated Quality Gates
+- **Local Testing**: Agents MUST run `npm test` locally and ensure they pass before pushing.
+- **CI/CD Alignment**: Every push triggers a GitHub Action. Code that fails builds or linting will NOT be merged to `main`.
+
 ## Change Tracking & Commits
 - **Change Log**: For every push to Git, the agent MUST update `CHANGELOG.md` in the root directory.
 - **Format**: Include the Date, Branch Name, and a clear bulleted list of changed files/logic.
