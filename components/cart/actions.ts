@@ -3,11 +3,12 @@
 import { TAGS } from 'lib/constants';
 import {
   addToCart,
+  applyCoupon,
   createCart,
   getCart,
   removeFromCart,
   updateCart
-} from 'lib/shopify';
+} from 'lib/vasu';
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -103,4 +104,18 @@ export async function redirectToCheckout() {
 export async function createCartAndSetCookie() {
   let cart = await createCart();
   (await cookies()).set('cartId', cart.id!);
+  (await cookies()).set('cartId', cart.id!);
+}
+
+export async function applyCouponCode(prevState: any, formData: FormData) {
+  const code = formData.get('code') as string;
+  if (!code) return 'Code required';
+
+  try {
+    await applyCoupon(code);
+    revalidateTag(TAGS.cart, 'seconds');
+    return 'Coupon applied';
+  } catch (e) {
+    return 'Error applying coupon';
+  }
 }

@@ -1,52 +1,135 @@
-import { Product } from '../shopify/types';
+import { Image, Product } from '../shopify/types';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_JAVA_BACKEND_URL || 'http://localhost:8080/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_JAVA_BACKEND_URL || 'http://localhost:8080/api/v1';
 
-const reshapeProduct = (product: any): Product => {
+// Types matching Java ProductDTO
+interface ProductDTO {
+  productId: number;
+  productName: string;
+  itemCode: string;
+  image: string;
+  description: string;
+  quantity: number;
+  price: number;
+  specialPrice: number;
+  variants: any[];
+  media: any[];
+}
+
+const reshapeProduct = (product: ProductDTO): Product => {
+  // Map images
+  const images: Image[] = [];
+
+  // Main image
+  if (product.image) {
+    images.push({
+      url: product.image.startsWith('http') ? product.image : `${BACKEND_URL}/public/products/image/${product.image}`,
+      altText: product.productName,
+      width: 600,
+      height: 600
+    });
+  }
+
+  // Additional media
+  if (product.media) {
+    product.media.forEach((m: any) => {
+      if (m.type === 'IMAGE') {
+        images.push({
+          url: m.url,
+          altText: product.productName,
+          width: 600,
+          height: 600
+        });
+      }
+    });
+  }
+
+  // Ensure we have at least one image
+  if (images.length === 0) {
+    images.push({
+      url: '/placeholder.png', // Add a placeholder if you have one, or keep empty
+      altText: 'No Image',
+      width: 600,
+      height: 600
+    });
+  }
+
+  // Extract Options (Color, Size) from variants
+  const options: any[] = []; // ProductOption[]
+  const uniqueColors = new Set<string>();
+  const uniqueSizes = new Set<string>();
+
+  if (product.variants) {
+    product.variants.forEach((v: any) => {
+      if (v.color) uniqueColors.add(v.color);
+      if (v.size) uniqueSizes.add(v.size);
+    });
+  }
+
+  if (uniqueColors.size > 0) {
+    options.push({
+      id: "opt-color",
+      name: "Color",
+      values: Array.from(uniqueColors)
+    });
+  }
+  if (uniqueSizes.size > 0) {
+    options.push({
+      id: "opt-size",
+      name: "Size",
+      values: Array.from(uniqueSizes)
+    });
+  }
+
+  const price = product.specialPrice > 0 ? product.specialPrice.toString() : product.price.toString();
+
   return {
     id: product.productId.toString(),
-    handle: product.productName.toLowerCase().replace(/ /g, '-'),
+    handle: product.itemCode || product.productName.toLowerCase().replace(/ /g, '-'),
     availableForSale: product.quantity > 0,
     title: product.productName,
     description: product.description,
     descriptionHtml: product.description,
-    options: [],
+    options: options,
     priceRange: {
       maxVariantPrice: {
-        amount: product.specialPrice.toString(),
+        amount: price,
         currencyCode: 'INR'
       },
       minVariantPrice: {
-        amount: product.specialPrice.toString(),
+        amount: price,
         currencyCode: 'INR'
       }
     },
-    variants: [
+    variants: product.variants && product.variants.length > 0 ? product.variants.map((v: any) => {
+      const variantOptions = [];
+      if (v.color) variantOptions.push({ name: 'Color', value: v.color });
+      if (v.size) variantOptions.push({ name: 'Size', value: v.size });
+
+      return {
+        id: v.variantId?.toString() || product.productId.toString(), // Use variantId if available
+        title: v.name || `${product.productName} - ${v.color || ''} ${v.size || ''}`,
+        availableForSale: (v.stockQuantity ?? 10) > 0, // Use stockQuantity from DTO
+        selectedOptions: variantOptions,
+        price: {
+          amount: v.price?.toString() || price,
+          currencyCode: 'INR'
+        }
+      };
+    }) : [
       {
         id: product.productId.toString(),
         title: product.productName,
         availableForSale: product.quantity > 0,
         selectedOptions: [],
         price: {
-          amount: product.specialPrice.toString(),
+          amount: price,
           currencyCode: 'INR'
         }
       }
     ],
-    featuredImage: {
-      url: product.image.startsWith('http') ? product.image : `${BACKEND_URL}/public/products/image/${product.image}`,
-      altText: product.productName,
-      width: 600,
-      height: 600
-    },
-    images: [
-      {
-        url: product.image.startsWith('http') ? product.image : `${BACKEND_URL}/public/products/image/${product.image}`,
-        altText: product.productName,
-        width: 600,
-        height: 600
-      }
-    ],
+    featuredImage: images[0]!,
+    images: images,
     seo: {
       title: product.productName,
       description: product.description
@@ -62,10 +145,17 @@ export async function getProducts({ query }: { query?: string }): Promise<Produc
     : `${BACKEND_URL}/public/products`;
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' }); // Ensure fresh data
     const data = await res.json();
-    if (!data.content) return [];
-    return data.content.map(reshapeProduct);
+
+    // Handle Pageable Response (data.content) or List
+    const content = data.content || data;
+
+    if (Array.isArray(content)) {
+      return content.map(reshapeProduct);
+    }
+    return [];
+
   } catch (e) {
     console.error('Error fetching products from Java:', e);
     return [];
@@ -73,8 +163,10 @@ export async function getProducts({ query }: { query?: string }): Promise<Produc
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
+  // Ideally, implemented GET /public/products/handle/{handle}
+  // For now, filtering client-side as per previous valid logic
   const products = await getProducts({});
-  return products.find((p) => p.handle === handle);
+  return products.find((p) => p.handle === handle || p.id === handle);
 }
 
 export async function getProductRecommendations(productId: string): Promise<Product[]> {
@@ -83,23 +175,35 @@ export async function getProductRecommendations(productId: string): Promise<Prod
 }
 
 export async function getCollectionProducts({ collection }: { collection: string }): Promise<Product[]> {
+  // If collection is 'all' or empty, fetch all.
+  // Ideally, filter by Category ID if collection != 'all'.
+  // For now, we return all products or search by keyword if collection is a keyword.
   return getProducts({});
 }
 
 export async function getCollections() {
-  return [
-    {
-      handle: '',
-      title: 'All',
-      description: 'All products',
-      seo: {
-        title: 'All',
-        description: 'All products'
-      },
-      path: '/search',
-      updatedAt: new Date().toISOString()
+  const url = `${BACKEND_URL}/public/categories`;
+  try {
+    const res = await fetch(url, { cache: 'force-cache' });
+    const data = await res.json();
+    if (data && data.content) {
+      return data.content.map((c: any) => ({
+        handle: c.categoryName.toLowerCase(), // In real app, use ID or proper handle
+        title: c.categoryName,
+        description: c.description || 'Category',
+        seo: {
+          title: c.categoryName,
+          description: c.description || 'Category'
+        },
+        path: `/search/${c.categoryName.toLowerCase()}`,
+        updatedAt: new Date().toISOString()
+      }));
     }
-  ];
+    return [];
+  } catch (e) {
+    console.error("Error fetching categories", e);
+    return [];
+  }
 }
 
 export async function getMenu(handle: string) {

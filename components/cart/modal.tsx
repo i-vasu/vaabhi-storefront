@@ -1,8 +1,8 @@
 'use client';
 
-import clsx from 'clsx';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 import LoadingDots from 'components/loading-dots';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
@@ -11,11 +11,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createCartAndSetCookie, redirectToCheckout } from './actions';
+import { applyCouponCode, createCartAndSetCookie, redirectToCheckout } from './actions';
 import { useCart } from './cart-context';
 import { DeleteItemButton } from './delete-item-button';
 import { EditItemQuantityButton } from './edit-item-quantity-button';
 import OpenCart from './open-cart';
+
+function CouponCode() {
+  const { pending } = useFormStatus();
+  // Using simple form state for now or just server action return?
+  // Ideally useActionState but keeping it simple for speed.
+  return (
+    <form action={applyCouponCode} className="flex gap-2">
+      <input
+        type="text"
+        name="code"
+        placeholder="Coupon Code"
+        className="w-full rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-700 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
+      />
+      <button
+        type="submit"
+        disabled={pending}
+        className="flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {pending ? <LoadingDots className="bg-white" /> : 'Apply'}
+      </button>
+    </form>
+  );
+}
 
 type MerchandiseSearchParams = {
   [key: string]: string;
@@ -154,7 +177,7 @@ export default function CartModal() {
                                       {item.merchandise.product.title}
                                     </span>
                                     {item.merchandise.title !==
-                                    DEFAULT_OPTION ? (
+                                      DEFAULT_OPTION ? (
                                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
                                         {item.merchandise.title}
                                       </p>
@@ -214,6 +237,9 @@ export default function CartModal() {
                         currencyCode={cart.cost.totalAmount.currencyCode}
                       />
                     </div>
+                  </div>
+                  <div className="mb-3 border-b border-neutral-200 pb-1 dark:border-neutral-700">
+                    <CouponCode />
                   </div>
                   <form action={redirectToCheckout}>
                     <CheckoutButton />
