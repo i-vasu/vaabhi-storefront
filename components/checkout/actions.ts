@@ -1,37 +1,14 @@
 'use server';
 
-import { submitCheckout } from 'lib/vasu';
-import { redirect } from 'next/navigation';
+import { placeOrder } from 'lib/backend';
 
-export async function performCheckout(prevState: any, formData: FormData) {
-    const email = formData.get('email');
-    const address = formData.get('address');
-    const city = formData.get('city');
-    const zip = formData.get('zip');
-    const card = formData.get('card');
-
-    if (!email || !address || !card) {
-        return 'All fields required';
-    }
+export async function createOrderAction(formData: FormData, cartId: number, paymentMethod: string = 'RAZORPAY') {
+    const email = formData.get('email') as string;
 
     try {
-        await submitCheckout({
-            email,
-            shippingAddress: {
-                address1: address,
-                city: city,
-                zip: zip,
-                country: 'US'
-            },
-            payment: {
-                method: 'CREDIT_CARD',
-                cardNumber: card
-            }
-        });
-    } catch (e) {
-        return 'Detailed Error: ' + (e instanceof Error ? e.message : 'Unknown');
+        const orderRes = await placeOrder(email, cartId, paymentMethod);
+        return { success: true, order: orderRes.data };
+    } catch (e: any) {
+        return { success: false, error: e.message };
     }
-
-    // Redirect to success page or clear cart
-    redirect('/checkout/success');
 }

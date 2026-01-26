@@ -1,93 +1,91 @@
 'use client';
 
-import { loginAction } from 'components/auth/actions';
-import { useFormStatus } from 'react-dom';
-// Fallback for older React if useActionState not available, typically usage is useFormState in 'react-dom'
-import { useFormState } from 'react-dom';
-
-function SubmitButton() {
-    const { pending } = useFormStatus();
-
-    return (
-        <button
-            type="submit"
-            disabled={pending}
-            className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:opacity-50"
-        >
-            {pending ? 'Signing in...' : 'Sign in'}
-        </button>
-    );
-}
+import { useAuth } from 'components/auth-context';
+import { loginUser } from 'lib/backend';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
-    const [state, formAction] = useFormState(loginAction, null);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const res = await loginUser({ email, password });
+            login(res['jwt-token'], res['refresh-token'], { email });
+            toast.success('Welcome back!');
+            router.push('/account');
+        } catch (err: any) {
+            toast.error(err.message || 'Login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                    Sign in to your account
-                </h2>
-            </div>
+        <div className="flex min-h-screen items-center justify-center px-4 py-12">
+            <div className="w-full max-w-md space-y-8 rounded-2xl border border-neutral-200 bg-white/80 p-10 shadow-xl backdrop-blur-xl dark:border-neutral-800 dark:bg-black/80">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold tracking-tight">Welcome Back</h2>
+                    <p className="mt-2 text-sm text-neutral-500">Sign in to your Vaabhi account</p>
+                </div>
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form action={formAction} className="space-y-6">
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                            Email address
-                        </label>
-                        <div className="mt-2">
+                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-500">Email address</label>
                             <input
-                                id="email"
-                                name="email"
+                                required
                                 type="email"
-                                autoComplete="email"
-                                required
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6 pl-2"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="mt-1 w-full rounded-md border border-neutral-200 bg-transparent p-3 text-sm focus:border-black focus:ring-0 dark:border-neutral-800 dark:focus:border-white"
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <div className="flex items-center justify-between">
-                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                Password
-                            </label>
-                            <div className="text-sm">
-                                <a href="#" className="font-semibold text-black hover:text-gray-700">
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <label className="block text-sm font-medium text-neutral-500">Password</label>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-xs text-neutral-400 hover:text-black hover:underline dark:hover:text-white"
+                                >
                                     Forgot password?
-                                </a>
+                                </Link>
                             </div>
-                        </div>
-                        <div className="mt-2">
                             <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
                                 required
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6 pl-2"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="mt-1 w-full rounded-md border border-neutral-200 bg-transparent p-3 text-sm focus:border-black focus:ring-0 dark:border-neutral-800 dark:focus:border-white"
                             />
                         </div>
                     </div>
 
-                    {state && (
-                        <div className="text-red-500 text-sm text-center font-semibold">
-                            {state}
-                        </div>
-                    )}
-
-                    <div>
-                        <SubmitButton />
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex w-full justify-center rounded-full bg-black py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 dark:bg-white dark:text-black"
+                    >
+                        {loading ? 'Signing in...' : 'Sign In'}
+                    </button>
                 </form>
 
-                <p className="mt-10 text-center text-sm text-gray-500">
-                    Not a member?{' '}
-                    <a href="/register" className="font-semibold leading-6 text-black hover:text-gray-700">
-                        Register now
-                    </a>
-                </p>
+                <div className="text-center text-sm">
+                    <p className="text-neutral-500">
+                        Don't have an account?{' '}
+                        <Link href="/register" className="font-bold text-black hover:underline dark:text-white">
+                            Create one
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

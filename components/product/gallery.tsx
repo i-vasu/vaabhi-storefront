@@ -3,6 +3,7 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { GridTileImage } from 'components/grid/tile';
 import { useProduct, useUpdateURL } from 'components/product/product-context';
+import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 
 export function Gallery({ images }: { images: { src: string; altText: string }[] }) {
@@ -18,17 +19,28 @@ export function Gallery({ images }: { images: { src: string; altText: string }[]
 
   return (
     <form>
-      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden">
-        {images[imageIndex] && (
-          <Image
-            className="h-full w-full object-contain"
-            fill
-            sizes="(min-width: 1024px) 66vw, 100vw"
-            alt={images[imageIndex]?.altText as string}
-            src={images[imageIndex]?.src as string}
-            priority={true}
-          />
-        )}
+      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden rounded-[2rem] bg-neutral-100 dark:bg-neutral-900">
+        <AnimatePresence mode="wait">
+          {images[imageIndex] && (
+            <motion.div
+              key={images[imageIndex]?.src}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="relative h-full w-full"
+            >
+              <Image
+                className="h-full w-full object-contain"
+                fill
+                sizes="(min-width: 1024px) 66vw, 100vw"
+                alt={images[imageIndex]?.altText as string}
+                src={images[imageIndex]?.src as string}
+                priority={true}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {images.length > 1 ? (
           <div className="absolute bottom-[15%] flex w-full justify-center">

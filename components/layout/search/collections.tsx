@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { Suspense } from 'react';
 
-import { getCollections } from 'lib/vasu';
+import { getCollections } from 'lib/backend';
 import FilterList from './filter';
 
 async function CollectionList() {

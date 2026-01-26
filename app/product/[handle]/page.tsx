@@ -3,12 +3,15 @@ import { notFound } from 'next/navigation';
 
 import { GridTileImage } from 'components/grid/tile';
 import Footer from 'components/layout/footer';
+import AuraInitializer from 'components/product/aura-initializer';
 import { Gallery } from 'components/product/gallery';
 import { ProductProvider } from 'components/product/product-context';
 import { ProductDescription } from 'components/product/product-description';
+import { ProductStorytelling } from 'components/product/product-storytelling';
+import ProductReviews from 'components/product/reviews';
+import { getProduct, getProductRecommendations, getRecentlyViewed, Image, trackProductView } from 'lib/backend';
 import { HIDDEN_PRODUCT_TAG } from 'lib/constants';
-import { getProduct, getProductRecommendations } from 'lib/java';
-import { Image } from 'lib/vasu';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
@@ -24,8 +27,8 @@ export async function generateMetadata(props: {
   const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG);
 
   return {
-    title: product.seo.title || product.title,
-    description: product.seo.description || product.description,
+    title: product.seo?.title || product.title,
+    description: product.seo?.description || product.description,
     robots: {
       index: indexable,
       follow: indexable,
@@ -54,6 +57,14 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
   const product = await getProduct(params.handle);
 
   if (!product) return notFound();
+
+  // Track view (using dynamic userId)
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get('vaabhi_user')?.value;
+  const user = userCookie ? JSON.parse(userCookie) : null;
+  const userId = user?.userId || user?.id || 1;
+
+  trackProductView(userId, Number(product.id)).catch(() => { });
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -103,8 +114,20 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
             </Suspense>
           </div>
         </div>
+
+        <ProductStorytelling productTitle={product.title} productImage={product.featuredImage?.url} />
+
         <RelatedProducts id={product.id} />
+
+        <div className="my-12">
+          <Suspense fallback={null}>
+            <RecentlyViewedProducts />
+          </Suspense>
+        </div>
+
+        <ProductReviews productId={product.id} initialReviews={(product as any).reviews} />
       </div>
+      <AuraInitializer imageUrl={product.featuredImage?.url} />
       <Footer />
     </ProductProvider>
   );
@@ -117,7 +140,7 @@ async function RelatedProducts({ id }: { id: string }) {
 
   return (
     <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
+      <h2 className="mb-4 text-2xl font-bold uppercase tracking-tighter">Related Styles</h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
         {relatedProducts.map((product) => (
           <li
@@ -139,6 +162,43 @@ async function RelatedProducts({ id }: { id: string }) {
                 src={product.featuredImage?.url}
                 fill
                 sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+async function RecentlyViewedProducts() {
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get('vaabhi_user')?.value;
+  const user = userCookie ? JSON.parse(userCookie) : null;
+  const userId = user?.userId || user?.id || 1;
+
+  const products = await getRecentlyViewed(userId, 6);
+
+  if (!products.length) return null;
+
+  return (
+    <div className="py-8 border-t border-neutral-100 dark:border-neutral-800">
+      <h2 className="mb-4 text-2xl font-bold uppercase tracking-tighter">Recently Viewed</h2>
+      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
+        {products.map((product) => (
+          <li
+            key={product.id}
+            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6"
+          >
+            <Link
+              className="relative h-full w-full"
+              href={`/product/${product.handle}`}
+            >
+              <GridTileImage
+                alt={product.title}
+                src={product.featuredImage?.url}
+                fill
+                sizes="(min-width: 1024px) 15vw, (min-width: 768px) 25vw, 50vw"
               />
             </Link>
           </li>

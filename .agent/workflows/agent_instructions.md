@@ -40,8 +40,12 @@ This repository is part of a **Fashion Store** platform with a headless architec
 - **Format**: Include the Date, Branch Name, and a clear bulleted list of changed files/logic.
 - **Commit Messages**: Use descriptive conventional commit prefixes (e.g., `feat:`, `fix:`, `refactor:`).
 
+## Data Adapter naming
+- **Naming Constraint**: NEVER use the project-specific name `vasu` in the codebase, directories, or imports. Use generic terms like `backend`, `storefront`, or `commerce`.
+- **Primary Adapter**: Use `lib/backend/index.ts` for all Java middleware communication.
+
 ## Important Files
 - `CHANGELOG.md`: History of all changes pushed by agents.
-- `lib/java/index.ts`: The primary adapter for the Java backend.
+- `lib/backend/index.ts`: The primary adapter for the Java backend.
 - `.env.example`: Template for environment variables.
 - `.agent/workflows/agent_instructions.md`: This file.

@@ -2,7 +2,7 @@
 
 import clsx from 'clsx';
 import { useProduct, useUpdateURL } from 'components/product/product-context';
-import { ProductOption, ProductVariant } from 'lib/vasu';
+import { ProductOption, ProductVariant } from 'lib/backend';
 
 type Combination = {
   id: string;

@@ -1,4 +1,4 @@
-import { getCollectionProducts } from 'lib/java';
+import { getCollectionProducts } from 'lib/backend';
 import Link from 'next/link';
 import { GridTileImage } from './grid/tile';
 

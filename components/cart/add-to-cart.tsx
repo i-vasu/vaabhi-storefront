@@ -4,7 +4,8 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { addItem } from 'components/cart/actions';
 import { useProduct } from 'components/product/product-context';
-import { Product, ProductVariant } from 'lib/vasu';
+import { motion } from 'framer-motion';
+import { Product, ProductVariant } from 'lib/backend';
 import { useActionState } from 'react';
 import { useCart } from './cart-context';
 
@@ -43,7 +44,8 @@ function SubmitButton({
   }
 
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.95 }}
       aria-label="Add to cart"
       className={clsx(buttonClasses, {
         'hover:opacity-90': true
@@ -53,7 +55,7 @@ function SubmitButton({
         <PlusIcon className="h-5" />
       </div>
       Add To Cart
-    </button>
+    </motion.button>
   );
 }
 

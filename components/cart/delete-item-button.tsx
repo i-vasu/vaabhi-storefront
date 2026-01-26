@@ -2,7 +2,7 @@
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { removeItem } from 'components/cart/actions';
-import type { CartItem } from 'lib/vasu';
+import type { CartItem } from 'lib/backend';
 import { useActionState } from 'react';
 
 export function DeleteItemButton({

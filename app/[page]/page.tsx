@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import Prose from 'components/prose';
-import { getPage } from 'lib/vasu';
+import { getPage } from 'lib/backend';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata(props: {

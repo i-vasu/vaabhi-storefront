@@ -19,24 +19,61 @@ import OpenCart from './open-cart';
 
 function CouponCode() {
   const { pending } = useFormStatus();
-  // Using simple form state for now or just server action return?
-  // Ideally useActionState but keeping it simple for speed.
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/coupons')
+      .then((res) => res.json())
+      .then((data) => setAvailableCoupons(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  const selectCoupon = (code: string) => {
+    if (inputRef.current) {
+      inputRef.current.value = code;
+    }
+  };
+
   return (
-    <form action={applyCouponCode} className="flex gap-2">
-      <input
-        type="text"
-        name="code"
-        placeholder="Coupon Code"
-        className="w-full rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-700 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
-      />
-      <button
-        type="submit"
-        disabled={pending}
-        className="flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {pending ? <LoadingDots className="bg-white" /> : 'Apply'}
-      </button>
-    </form>
+    <div className="space-y-4">
+      <form action={applyCouponCode} className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          name="code"
+          placeholder="Coupon Code"
+          className="w-full rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-700 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
+        />
+        <button
+          type="submit"
+          disabled={pending}
+          className="flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {pending ? <LoadingDots className="bg-white" /> : 'Apply'}
+        </button>
+      </form>
+
+      {availableCoupons.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Available Offers</p>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {availableCoupons.map((coupon) => (
+              <button
+                key={coupon.couponId}
+                onClick={() => selectCoupon(coupon.couponCode)}
+                className="flex flex-none flex-col items-start rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-2 text-left transition-colors hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20"
+              >
+                <span className="text-xs font-bold text-blue-600">{coupon.couponCode}</span>
+                <span className="text-[10px] text-blue-500">
+                  {coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}% Off` : `₹${coupon.discountValue} Off`}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -216,12 +253,28 @@ export default function CartModal() {
                         );
                       })}
                   </ul>
-                  <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                      <p>Taxes</p>
+                  <div className="py-4 text-xs text-neutral-500 dark:text-neutral-400">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p>Subtotal</p>
                       <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalTaxAmount.amount}
+                        className="text-right text-black dark:text-white"
+                        amount={cart.cost.subtotalAmount.amount}
+                        currencyCode={cart.cost.subtotalAmount.currencyCode}
+                      />
+                    </div>
+                    <div className="mb-1 flex items-center justify-between">
+                      <p>CGST (6%)</p>
+                      <Price
+                        className="text-right"
+                        amount={(Number(cart.cost.totalTaxAmount.amount) / 2).toFixed(2)}
+                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
+                      />
+                    </div>
+                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
+                      <p>SGST (6%)</p>
+                      <Price
+                        className="text-right"
+                        amount={(Number(cart.cost.totalTaxAmount.amount) / 2).toFixed(2)}
                         currencyCode={cart.cost.totalTaxAmount.currencyCode}
                       />
                     </div>

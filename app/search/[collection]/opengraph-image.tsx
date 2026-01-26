@@ -1,5 +1,5 @@
 import OpengraphImage from 'components/opengraph-image';
-import { getCollection } from 'lib/vasu';
+import { getCollection } from 'lib/backend';
 
 export default async function Image({
   params

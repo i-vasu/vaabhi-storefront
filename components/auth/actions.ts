@@ -1,6 +1,6 @@
 'use server';
 
-import { login, register } from 'lib/vasu';
+import { login, register } from 'lib/backend';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 

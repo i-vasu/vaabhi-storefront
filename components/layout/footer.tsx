@@ -1,8 +1,7 @@
-import Link from 'next/link';
-
 import FooterMenu from 'components/layout/footer-menu';
 import LogoSquare from 'components/logo-square';
-import { getMenu } from 'lib/vasu';
+import { getMenu, getTenantConfig } from 'lib/backend';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
 const { COMPANY_NAME, SITE_NAME } = process.env;
@@ -12,7 +11,8 @@ export default async function Footer() {
   const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : '');
   const skeleton = 'w-full h-6 animate-pulse rounded-sm bg-neutral-200 dark:bg-neutral-700';
   const menu = await getMenu('next-js-frontend-footer-menu');
-  const copyrightName = COMPANY_NAME || SITE_NAME || '';
+  const tenant = await getTenantConfig();
+  const copyrightName = tenant.name || COMPANY_NAME || SITE_NAME || '';
 
   return (
     <footer className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -20,7 +20,7 @@ export default async function Footer() {
         <div>
           <Link className="flex items-center gap-2 text-black md:pt-1 dark:text-white" href="/">
             <LogoSquare size="sm" />
-            <span className="uppercase">{SITE_NAME}</span>
+            <span className="uppercase">{tenant.name}</span>
           </Link>
         </div>
         <Suspense

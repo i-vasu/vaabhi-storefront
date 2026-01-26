@@ -1,5 +1,5 @@
 import OpengraphImage from 'components/opengraph-image';
-import { getPage } from 'lib/vasu';
+import { getPage } from 'lib/backend';
 
 export default async function Image({ params }: { params: { page: string } }) {
   const page = await getPage(params.page);

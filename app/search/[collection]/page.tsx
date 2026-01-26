@@ -1,4 +1,4 @@
-import { getCollection, getCollectionProducts } from 'lib/vasu';
+import { getCollection, getCollectionProducts } from 'lib/backend';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 

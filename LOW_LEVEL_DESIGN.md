@@ -7,15 +7,15 @@ This document details the low-level design for the **Vaabhi Storefront**, a Next
 - **Framework**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS 4
 - **State Management**: React Server Components (RSC) for fetching, specialized Context for Cart/UI state.
-- **Backend Communication**: REST API (via `lib/vasu`) adapting Backend DTOs to internal UI interfaces.
+- **Backend Communication**: REST API (via `lib/backend`) adapting Backend DTOs to internal UI interfaces.
 
 ```mermaid
 graph TD
     Client[Browser] -->|RSC/SSR| NextServer[Next.js Server]
     Client -->|Client Interactions| NextClient[Client Components]
     
-    subgraph "Data Layer (lib/vasu)"
-        NextServer -->|vasuFetch| Backend[Java Modulith Service]
+    subgraph "Data Layer (lib/backend)"
+        NextServer -->|backendFetch| Backend[Java Modulith Service]
         NextClient -->|Server Actions| Backend
     end
     
@@ -37,21 +37,21 @@ vaabhi-storefront/
 │   ├── layout/           # Shared layout components
 │   └── premium-motion/   # Framer Motion animations
 └── lib/                  # Logic & Utilities
-    ├── vasu/             # Backend Adapter (THE key integration point)
+    ├── backend/             # Backend Adapter (THE key integration point)
     │   ├── index.ts      # API Client & Mapper Functions
     │   └── types.ts      # (Implicit) UI Interfaces
     └── utils.ts          # General helpers
 ```
 
-## 4. Data Layer Design (`lib/vasu`)
+## 4. Data Layer Design (`lib/backend`)
 The storefront uses a **Adapter Pattern** to isolate the UI from Backend API changes. The backend returns DTOs (Data Transfer Objects) which are mapped to "Shopify-style" interfaces favored by the UI template.
 
 ### 4.1. Core Mappers
-Located in `lib/vasu/index.ts`:
+Located in `lib/backend/index.ts`:
 - `mapProductToShopify(dto: ProductDTO): Product`
 - `mapCartToShopify(dto: CartDTO): Cart`
 
-### 4.2. API Client (`vasuFetch`)
+### 4.2. API Client (`backendFetch`)
 A typically shared fetch wrapper ensuring:
 - Base URL injection (`NEXT_PUBLIC_API_URL`)
 - Default Headers (`Content-Type: application/json`)
@@ -82,7 +82,7 @@ A typically shared fetch wrapper ensuring:
 
 ### 6.1. Product Discovery (PLP/PDP)
 1. User visits `/search` or `/product/[handle]`.
-2. **Next.js Server**: Calls `lib/vasu.getProducts` or `getProduct`.
+2. **Next.js Server**: Calls `lib/backend.getProducts` or `getProduct`.
 3. **Adapter**: Calls Backend `/api/products`.
 4. **Backend**: Queries ParadeDB (Search) or Postgres.
 5. **Adapter**: Maps `ProductDTO[]` -> `Product[]`.
@@ -105,7 +105,7 @@ A typically shared fetch wrapper ensuring:
    - *Future*: Backend should return a Stripe/Payment Gateway URL.
 
 ## 7. Error Handling & Edge Cases
-- **API Failures**: `vasuFetch` throws standard Errors.
+- **API Failures**: `backendFetch` throws standard Errors.
   - *Server Side*: `error.tsx` catches and shows "Something went wrong".
   - *Client Side*: `sonner` toasts for failed actions (e.g., "Failed to add item").
 - **Missing Images**: Mappers provide placeholders (`https://placehold.co/...`) if DTO `image` is null.
@@ -113,7 +113,7 @@ A typically shared fetch wrapper ensuring:
 
 ## 8. Development & Extension Guide
 - **Adding a Field**: 
-  1. Update `ProductDTO` interface in `lib/vasu/index.ts`.
+  1. Update `ProductDTO` interface in `lib/backend/index.ts`.
   2. Update `mapProductToShopify` to include the field.
   3. Consume field in React Component.
 - **Changing Backend URL**: Update `.env.local` -> `NEXT_PUBLIC_API_URL`.

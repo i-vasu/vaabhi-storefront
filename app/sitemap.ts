@@ -1,5 +1,5 @@
 import { baseUrl, validateEnvironmentVariables } from 'lib/utils';
-import { getCollections, getPages, getProducts } from 'lib/vasu';
+import { getCollections, getPages, getProducts } from 'lib/backend';
 import { MetadataRoute } from 'next';
 
 type Route = {
