@@ -11,7 +11,7 @@ export default function HyperswitchButton({
 }: {
     orderId: number;
     amount: number;
-    onSuccess: () => void;
+    onSuccess: (response?: any) => void;
     onError: (err: string) => void;
 }) {
     const [loading, setLoading] = useState(false);

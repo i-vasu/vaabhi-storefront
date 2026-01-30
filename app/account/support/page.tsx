@@ -27,15 +27,21 @@ export default async function SupportPage() {
                             </div>
                         ) : (
                             tickets.map((ticket: any) => (
-                                <div key={ticket.id || ticket.ticketId} className="p-6">
+                                <Link
+                                    key={ticket.id || ticket.ticketId}
+                                    href={`/account/support/${ticket.id || ticket.ticketId}`}
+                                    className="block p-6 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                                >
                                     <div className="flex items-center justify-between">
                                         <p className="font-bold">#{ticket.id || ticket.ticketId} - {ticket.subject}</p>
                                         <span className="rounded-full bg-blue-100 px-3 py-1 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-900/30">
                                             {ticket.status}
                                         </span>
                                     </div>
-                                    <p className="mt-2 text-sm text-neutral-500 line-clamp-2">{ticket.description}</p>
-                                </div>
+                                    <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
+                                        {ticket.messages?.[0]?.message || 'No description provided.'}
+                                    </p>
+                                </Link>
                             ))
                         )}
                     </div>

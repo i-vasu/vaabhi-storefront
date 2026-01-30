@@ -9,8 +9,55 @@ import {
 } from 'lib/shopify/types';
 export * from 'lib/shopify/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/backend';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 const API_VERSION_HEADER = 'application/vnd.vaabhi.v1+json';
+
+export function getImageUrl(image: string | undefined): string {
+    if (!image || image === 'default.png') {
+        return 'https://placehold.co/600x400';
+    }
+    if (image.startsWith('http')) {
+        return image;
+    }
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+    return `${baseUrl}/public/products/image/${image}`;
+}
+
+async function setBackendCookie(name: string, value: string) {
+    if (typeof window !== 'undefined') {
+        document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}`; // 30 days
+        return;
+    }
+    try {
+        const { cookies } = await import('next/headers');
+        (await cookies()).set(name, value, { path: '/', maxAge: 60 * 60 * 24 * 30 });
+    } catch (e) { }
+}
+
+async function getBackendCookie(name: string): Promise<string | undefined> {
+    if (typeof window !== 'undefined') {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        const value = match?.[2];
+        return value ? decodeURIComponent(value) : undefined;
+    }
+    try {
+        const { cookies } = await import('next/headers');
+        return (await cookies()).get(name)?.value;
+    } catch (e) {
+        return undefined;
+    }
+}
+
+async function getBackendEmail(): Promise<string> {
+    const userCookie = await getBackendCookie('vaabhi_user');
+    if (userCookie) {
+        try {
+            const user = JSON.parse(decodeURIComponent(userCookie));
+            return user.email;
+        } catch (e) { }
+    }
+    return 'customer@example.com';
+}
 
 // --- DTO Definitions (Mirroring Backend) ---
 
@@ -56,22 +103,7 @@ export interface AddressDTO {
 // --- Fetch Wrapper ---
 
 async function backendFetch<T>(path: string, options?: RequestInit, retries = 3): Promise<T> {
-    let token: string | undefined;
-
-    if (typeof window !== 'undefined') {
-        // Client-side cookie retrieval
-        const match = document.cookie.match(new RegExp('(^| )vaabhi_token=([^;]+)'));
-        if (match) token = match[2];
-    } else {
-        // Server-side cookie retrieval
-        try {
-            const { cookies } = await import('next/headers');
-            const cookieStore = await cookies();
-            token = cookieStore.get('vaabhi_token')?.value;
-        } catch (err) {
-            console.error('Error fetching cookies in RSC:', err);
-        }
-    }
+    const token = await getBackendCookie('vaabhi_token');
 
     for (let i = 0; i < retries; i++) {
         try {
@@ -133,18 +165,14 @@ function mapProductToShopify(dto: ProductDTO): Product {
             }
         ],
         featuredImage: {
-            url: dto.image && dto.image !== 'default.png'
-                ? (dto.image.startsWith('http') ? dto.image : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/public/products/image/${dto.image}`)
-                : 'https://placehold.co/600x400',
+            url: getImageUrl(dto.image),
             altText: dto.productName,
             width: 600,
             height: 400
         },
         images: [
             {
-                url: dto.image && dto.image !== 'default.png'
-                    ? (dto.image.startsWith('http') ? dto.image : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/public/products/image/${dto.image}`)
-                    : 'https://placehold.co/600x400',
+                url: getImageUrl(dto.image),
                 altText: dto.productName,
                 width: 600,
                 height: 400
@@ -269,15 +297,21 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
     }
 }
 
-// Backend: POST /api/v1/public/carts
-const res = await backendFetch<any>('/public/carts', { method: 'POST' });
-return mapCartToShopify(res.data || res);
+export async function createCart(): Promise<Cart> {
+    // Backend: POST /api/v1/public/carts
+    const res = await backendFetch<any>("/public/carts", { method: "POST" });
+    const cart = mapCartToShopify(res.data || res);
+    if (cart.id) {
+        await setBackendCookie('cartId', cart.id);
+    }
+    return cart;
+}
 
 export async function getCart(): Promise<Cart | undefined> {
-    const cartId = (await cookies()).get('cartId')?.value;
+    const cartId = await getBackendCookie('cartId');
     if (!cartId) return undefined;
 
-    const email = await getSessionEmail();
+    const email = await getBackendEmail();
 
     try {
         // Backend: GET /api/v1/public/users/{email}/carts/{cartId}
@@ -289,7 +323,7 @@ export async function getCart(): Promise<Cart | undefined> {
 }
 
 export async function addToCart(lines: { merchandiseId: string; quantity: number }[]): Promise<Cart> {
-    let cartId = (await cookies()).get('cartId')?.value;
+    let cartId = await getBackendCookie('cartId');
 
     if (!cartId) {
         const newCart = await createCart();
@@ -313,7 +347,7 @@ export async function addToCart(lines: { merchandiseId: string; quantity: number
 }
 
 export async function removeFromCart(lineIds: string[]): Promise<Cart> {
-    const cartId = (await cookies()).get('cartId')?.value;
+    const cartId = await getBackendCookie('cartId');
     if (!cartId) throw new Error('No Cart ID');
 
     // Backend: DELETE /api/v1/public/carts/{cartId}/product/{productId}
@@ -325,7 +359,7 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 }
 
 export async function updateCart(lines: { id: string; merchandiseId: string; quantity: number }[]): Promise<Cart> {
-    const cartId = (await cookies()).get('cartId')?.value;
+    const cartId = await getBackendCookie('cartId');
     if (!cartId) throw new Error('No Cart ID');
 
     // Backend: PUT /api/v1/public/carts/{cartId}/products/{productId}/quantity/{quantity}
@@ -340,7 +374,7 @@ export async function updateCart(lines: { id: string; merchandiseId: string; qua
 
 
 export async function applyCoupon(code: string): Promise<Cart> {
-    const cartId = (await cookies()).get('cartId')?.value;
+    const cartId = await getBackendCookie('cartId');
     if (!cartId) throw new Error('No Cart ID');
 
     // Backend: POST /api/v1/public/carts/{id}/coupon/{code}
@@ -352,7 +386,7 @@ export async function applyCoupon(code: string): Promise<Cart> {
 }
 
 export async function removeCoupon(code: string): Promise<Cart> {
-    const cartId = (await cookies()).get('cartId')?.value;
+    const cartId = await getBackendCookie('cartId');
     if (!cartId) throw new Error('No Cart ID');
 
     // Backend: DELETE /api/v1/public/carts/{id}/coupon
@@ -364,15 +398,15 @@ export async function removeCoupon(code: string): Promise<Cart> {
 }
 
 export async function createPaymentOrder(orderId: number): Promise<{ success: boolean; data: string }> {
-    // Backend: POST /api/v1/create/{orderId}
-    return backendFetch<{ success: boolean; data: string }>(`/create/${orderId}`, {
+    // Backend: POST /api/v1/v1/create/{orderId}
+    return backendFetch<{ success: boolean; data: string }>(`/v1/create/${orderId}`, {
         method: 'POST'
     });
 }
 
 export async function verifyPayment(orderId: number, paymentId: string, signature: string): Promise<any> {
     // Backend: POST /api/v1/verify
-    return backendFetch(`/verify?orderId=${orderId}&paymentId=${paymentId}&signature=${signature}`, {
+    return backendFetch(`/v1/verify?orderId=${orderId}&paymentId=${paymentId}&signature=${signature}`, {
         method: 'POST'
     });
 }
@@ -404,14 +438,47 @@ export async function getOrderById(email: string, orderId: number): Promise<any>
     }
 }
 
-export async function getUserProfile(email: string): Promise<any> {
-    // Backend likely has a user endpoint.
+export async function getUserProfile(): Promise<any> {
     try {
-        const res = await backendFetch<any>(`/public/users/${email}`);
+        // Backend: GET /api/v1/public/users/me
+        const res = await backendFetch<any>("/public/users/me");
         return res.data || res;
     } catch (e) {
         return null;
     }
+}
+
+export async function getWishlist(): Promise<Product[]> {
+    try {
+        // Backend: GET /api/v1/wishlist
+        const res = await backendFetch<any>("/v1/wishlist");
+        const dtos = res.data || [];
+        return dtos.map(mapProductToShopify);
+    } catch (error) {
+        console.error("getWishlist error:", error);
+        return [];
+    }
+}
+
+export async function addToWishlist(productId: string): Promise<void> {
+    // Backend: POST /api/v1/wishlist/{productId}
+    await backendFetch(`/v1/wishlist/${productId}`, {
+        method: "POST"
+    });
+}
+
+export async function removeFromWishlist(productId: string): Promise<void> {
+    // Backend: DELETE /api/v1/wishlist/{productId}
+    await backendFetch(`/v1/wishlist/${productId}`, {
+        method: "DELETE"
+    });
+}
+
+export async function clearWishlist(): Promise<void> {
+    // Backend: DELETE /api/v1/wishlist
+    await backendFetch("/v1/wishlist", {
+        method: "DELETE"
+    });
 }
 
 export async function updateUserProfile(userId: number, data: any): Promise<any> {
@@ -447,7 +514,7 @@ export async function visualSearchByImage(imageFile: File): Promise<Product[]> {
 
     // Backend: POST /api/v1/search/visual
     // Note: We use fetch directly here instead of backendFetch because of FormData
-    const res = await fetch(`${API_URL}/search/visual`, {
+    const res = await fetch(`${API_URL}/v1/search/visual`, {
         method: 'POST',
         body: formData
         // Content-Type is set automatically by the browser for FormData
@@ -593,8 +660,8 @@ export async function addReview(productId: number, review: { rating: number; com
 
 export async function getBlogs(): Promise<BlogDTO[]> {
     try {
-        // Backend: GET /api/v1/blogs
-        return await backendFetch<BlogDTO[]>('/blogs');
+        // Backend: GET /api/v1/v1/blogs/public
+        return await backendFetch<BlogDTO[]>('/v1/blogs/public');
     } catch (error) {
         console.error('getBlogs error:', error);
         return [];
@@ -603,8 +670,8 @@ export async function getBlogs(): Promise<BlogDTO[]> {
 
 export async function getBlog(id: string): Promise<BlogDTO | undefined> {
     try {
-        // Backend: GET /api/v1/blogs/{blogId}
-        return await backendFetch<BlogDTO>(`/blogs/${id}`);
+        // Backend: GET /api/v1/v1/blogs/public/{blogId}
+        return await backendFetch<BlogDTO>(`/v1/blogs/public/${id}`);
     } catch (error) {
         console.error('getBlog error:', error);
         return undefined;
@@ -617,6 +684,15 @@ export async function getWalletDetails(): Promise<{ balance: number; transaction
         return await backendFetch<{ balance: number; transactions: any[] }>('/v1/user/account/wallet');
     } catch (error) {
         return { balance: 0, transactions: [] };
+    }
+}
+
+export async function getUserReturns(): Promise<any[]> {
+    try {
+        const res = await backendFetch<any>('/v1/user/orders/returns');
+        return Array.isArray(res) ? res : (res.data || []);
+    } catch (error) {
+        return [];
     }
 }
 
@@ -730,7 +806,7 @@ export async function getActiveCoupons(): Promise<any[]> {
 
 export async function getUserTickets(email: string): Promise<any[]> {
     try {
-        const res = await backendFetch<any>(`/v1/support/users/${email}`);
+        const res = await backendFetch<any>(`/v1/tickets/${email}`);
         return res.content || [];
     } catch (error) {
         return [];
@@ -738,11 +814,19 @@ export async function getUserTickets(email: string): Promise<any[]> {
 }
 
 export async function createTicket(ticket: { subject: string, description: string, userEmail: string }): Promise<any> {
-    return backendFetch('/v1/support/tickets', {
+    return backendFetch('/v1/tickets', {
         method: 'POST',
-        body: JSON.stringify(ticket)
+        body: JSON.stringify({ userEmail: ticket.userEmail, subject: ticket.subject, message: ticket.description })
     });
 }
+
+export async function replyToTicket(ticketId: number, message: { senderType: string, senderId: string, message: string }): Promise<any> {
+    return backendFetch(`/v1/tickets/${ticketId}/reply`, {
+        method: 'POST',
+        body: JSON.stringify(message)
+    });
+}
+
 
 export async function getTenantConfig() {
     try {
@@ -806,4 +890,13 @@ export async function revalidate(req: any): Promise<any> {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
     });
+}
+
+export async function getTicket(ticketId: number): Promise<any> {
+    try {
+        const res = await backendFetch<any>(`/v1/tickets/detail/${ticketId}`);
+        return res.data || res;
+    } catch (error) {
+        return null;
+    }
 }

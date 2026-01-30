@@ -91,14 +91,30 @@ export default function CheckoutPage() {
                             orderId={orderInfo.id}
                             email={orderInfo.email}
                             amount={orderInfo.total}
-                            onSuccess={() => router.push(`/checkout/success?id=${orderInfo.id}`)}
+                            onSuccess={(res) => {
+                            const params = new URLSearchParams({ id: orderInfo.id.toString() });
+                            if (res?.razorpay_payment_id) {
+                                params.append("razorpay_payment_id", res.razorpay_payment_id);
+                                params.append("razorpay_order_id", res.razorpay_order_id);
+                                params.append("razorpay_signature", res.razorpay_signature);
+                            }
+                            router.push(`/checkout/success?${params.toString()}`);
+                        }}
                             onError={(err) => setError(err)}
                         />
                     ) : (
                         <HyperswitchButton
                             orderId={orderInfo.id}
                             amount={orderInfo.total}
-                            onSuccess={() => router.push(`/checkout/success?id=${orderInfo.id}`)}
+                            onSuccess={(res) => {
+                            const params = new URLSearchParams({ id: orderInfo.id.toString() });
+                            if (res?.razorpay_payment_id) {
+                                params.append("razorpay_payment_id", res.razorpay_payment_id);
+                                params.append("razorpay_order_id", res.razorpay_order_id);
+                                params.append("razorpay_signature", res.razorpay_signature);
+                            }
+                            router.push(`/checkout/success?${params.toString()}`);
+                        }}
                             onError={(err) => setError(err)}
                         />
                     )}

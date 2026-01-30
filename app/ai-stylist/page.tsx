@@ -17,7 +17,7 @@ export default function AIStylistPage() {
         setResultImage(null);
         setStatus('Initializing...');
 
-        const url = `/api/backend/search/custom-design/public/generate/stream?prompt=${encodeURIComponent(prompt)}`;
+        const url = `/api/backend/v1/search/custom-design/public/generate/stream?prompt=${encodeURIComponent(prompt)}`;
         const eventSource = new EventSource(url);
 
         eventSource.onmessage = (event) => {

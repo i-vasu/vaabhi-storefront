@@ -1,10 +1,10 @@
 'use client';
 
-import { createAddress } from 'lib/backend';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { handleCreateAddress } from '../../actions';
 
 export default function NewAddressPage() {
     const router = useRouter();
@@ -26,12 +26,15 @@ export default function NewAddressPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            await createAddress(formValues);
-            toast.success('Address added successfully');
-            router.push('/account/addresses');
-            router.refresh();
+            const res = await handleCreateAddress(formValues);
+            if (res.success) {
+                toast.success('Address added successfully');
+                router.push('/account/addresses');
+            } else {
+                toast.error(res.error || 'Failed to add address');
+            }
         } catch (err: any) {
-            toast.error(err.message || 'Failed to add address');
+            toast.error('An error occurred');
         } finally {
             setLoading(false);
         }

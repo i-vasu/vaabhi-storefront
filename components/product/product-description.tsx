@@ -8,6 +8,7 @@ import { Product } from 'lib/backend';
 import SizeGuide from './size-guide';
 import { VariantSelector } from './variant-selector';
 import VirtualTryOn from './virtual-try-on';
+import WishlistButton from './wishlist-button';
 
 export function ProductDescription({ product }: { product: Product }) {
   return (

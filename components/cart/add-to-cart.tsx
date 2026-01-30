@@ -59,6 +59,8 @@ function SubmitButton({
   );
 }
 
+import { trackEvent } from 'components/analytics/umami';
+
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
   const { addCartItem } = useCart();
@@ -81,6 +83,11 @@ export function AddToCart({ product }: { product: Product }) {
     <form
       action={async () => {
         addCartItem(finalVariant, product);
+        trackEvent('Add to Cart', {
+          product: product.title,
+          productId: product.id,
+          price: product.priceRange.maxVariantPrice.amount
+        });
         addItemAction();
       }}
     >

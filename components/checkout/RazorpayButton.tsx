@@ -31,7 +31,7 @@ export default function RazorpayButton({
     orderId: number;
     email: string;
     amount: number;
-    onSuccess: () => void;
+    onSuccess: (response: any) => void;
     onError: (err: string) => void;
 }) {
     const [loading, setLoading] = useState(false);
@@ -66,7 +66,7 @@ export default function RazorpayButton({
                             response.razorpay_payment_id,
                             response.razorpay_signature
                         );
-                        onSuccess();
+                        onSuccess(response);
                     } catch (err) {
                         onError('Payment verification failed');
                     }

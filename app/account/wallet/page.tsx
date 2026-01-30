@@ -42,7 +42,7 @@ export default async function WalletPage() {
                                 {wallet.transactions.map((tx: any, idx: number) => (
                                     <tr key={idx} className="hover:bg-neutral-50 dark:hover:bg-neutral-950/50">
                                         <td className="px-6 py-4 whitespace-nowrap text-neutral-500">
-                                            {new Date(tx.date || Date.now()).toLocaleDateString()}
+                                            {new Date(tx.createdAt || Date.now()).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4 font-medium">
                                             {tx.description || 'Order Payment'}

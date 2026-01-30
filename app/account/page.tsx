@@ -1,20 +1,27 @@
-import { getOrderHistory, getRewardPoints, getUserProfile, getWalletDetails } from 'lib/backend';
+import { GridTileImage } from 'components/grid/tile';
+import { getOrderHistory, getRecentlyViewed, getRewardPoints, getUserProfile, getWalletDetails } from 'lib/backend';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+
+export const metadata = {
+    title: 'Account | Vaabhi Storefront',
+    description: 'Manage your profile, orders, and rewards.'
+};
 
 export default async function AccountPage() {
     const cookieStore = await cookies();
     const userCookie = cookieStore.get('vaabhi_user')?.value;
     const user = userCookie ? JSON.parse(userCookie) : null;
     const email = user?.email || 'customer@example.com';
+    const userId = user?.userId || user?.id || 1;
 
-    const profile = await getUserProfile(email);
+    const profile = await getUserProfile();
     const orders = await getOrderHistory(email);
 
     // Feature Parity: Wallet and Rewards
     const wallet = await getWalletDetails();
     const rewards = await getRewardPoints();
-
+    const recentlyViewed = await getRecentlyViewed(userId, 4);
     return (
         <div className="space-y-10">
             <section>
@@ -124,6 +131,32 @@ export default async function AccountPage() {
                     Manage Saved Addresses
                 </Link>
             </div>
+
+            {/* Recently Viewed */}
+            {recentlyViewed.length > 0 && (
+                <section>
+                    <h2 className="mb-6 text-xl font-bold">Picked for You (Recently Viewed)</h2>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        {recentlyViewed.map((product) => (
+                            <Link
+                                key={product.id}
+                                href={`/product/${product.handle}`}
+                                className="group relative aspect-square overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800"
+                            >
+                                <GridTileImage
+                                    alt={product.title}
+                                    src={product.featuredImage?.url}
+                                    fill
+                                    sizes="(min-width: 1024px) 15vw, (min-width: 768px) 25vw, 50vw"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <p className="truncate text-xs font-bold text-white">{product.title}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {/* Loyalty Perks Section */}
             <section className="rounded-2xl bg-neutral-900 p-8 text-white">

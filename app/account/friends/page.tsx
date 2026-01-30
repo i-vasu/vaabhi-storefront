@@ -1,4 +1,7 @@
 import { getCurrentUser } from 'lib/auth-utils';
+import { getFriends } from 'lib/backend';
+import Link from 'next/link';
+import { handleAddFriend } from '../actions';
 
 export default async function FriendsPage() {
     const user = await getCurrentUser();
@@ -52,7 +55,7 @@ export default async function FriendsPage() {
                     <h2 className="text-xl font-bold">Invite Someone</h2>
                     <p className="mt-2 text-sm text-neutral-400">Add a friend to your circle and unlock curated social features.</p>
 
-                    <form action={async (formData) => { await handleAddFriend(formData); }} className="mt-8 space-y-4">
+                    <form action={handleAddFriend} className="mt-8 space-y-4">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500">Friend's Email</label>
                             <input

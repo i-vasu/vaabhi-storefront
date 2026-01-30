@@ -65,6 +65,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={GeistSans.variable}>
       <ThemeInitializer accentColor={tenant.accentColor} />
+      <UmamiAnalytics />
       <body className="bg-neutral-50 text-black selection:bg-[var(--accent-color,teal)] dark:bg-neutral-900 dark:text-white dark:selection:bg-[var(--accent-color,pink)] dark:selection:text-white">
         <AuthProvider>
           <WishlistProvider>

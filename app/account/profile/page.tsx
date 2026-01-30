@@ -4,8 +4,7 @@ import Link from 'next/link';
 
 export default async function ProfilePage() {
     const user = await getCurrentUser();
-    const email = user?.email || 'customer@example.com';
-    const profile = await getUserProfile(email);
+    const profile = await getUserProfile();
 
     return (
         <div className="mx-auto max-w-4xl space-y-10">
@@ -25,7 +24,7 @@ export default async function ProfilePage() {
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500">Email Address</label>
-                            <p className="mt-1 font-medium">{profile?.email || email}</p>
+                            <p className="mt-1 font-medium">{profile?.email || 'customer@example.com'}</p>
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500">Phone</label>

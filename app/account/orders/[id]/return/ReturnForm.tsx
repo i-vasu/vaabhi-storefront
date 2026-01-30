@@ -31,10 +31,16 @@ export default function ReturnForm({ orderId, items }: { orderId: number, items:
         }
 
         setLoading(true);
+        const itemsMap: Record<number, number> = {};
+        itemIds.forEach(id => {
+            const item = items.find(i => i.orderItemId === Number(id));
+            if (item) itemsMap[item.orderItemId] = item.quantity;
+        });
+
         const formData = new FormData();
         formData.append('reason', reason);
         formData.append('refundType', refundType);
-        // In a real app we'd pass item details too
+        formData.append('items', JSON.stringify(itemsMap));
 
         try {
             const res = await handleReturnRequest(orderId, formData);
@@ -112,13 +118,13 @@ export default function ReturnForm({ orderId, items }: { orderId: number, items:
                             <p className="text-xs text-neutral-500">Instant credit (Recommended)</p>
                         </div>
                     </label>
-                    <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all ${refundType === 'ORIGINAL' ? 'border-black bg-neutral-50 dark:border-white dark:bg-neutral-800' : 'border-neutral-200 dark:border-neutral-800'}`}>
+                    <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all ${refundType === 'ORIGINAL_SOURCE' ? 'border-black bg-neutral-50 dark:border-white dark:bg-neutral-800' : 'border-neutral-200 dark:border-neutral-800'}`}>
                         <input
                             type="radio"
                             name="refund"
-                            value="ORIGINAL"
-                            checked={refundType === 'ORIGINAL'}
-                            onChange={() => setRefundType('ORIGINAL')}
+                            value="ORIGINAL_SOURCE"
+                            checked={refundType === 'ORIGINAL_SOURCE'}
+                            onChange={() => setRefundType('ORIGINAL_SOURCE')}
                             className="mt-1"
                         />
                         <div className="ml-3">

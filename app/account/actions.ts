@@ -1,7 +1,7 @@
 'use server';
 
 import { getCurrentUser } from 'lib/auth-utils';
-import { addFriend, createTicket, submitReturnRequest, transferRewards } from 'lib/backend';
+import { addFriend, createAddress, createTicket, deleteAddress, submitReturnRequest, transferRewards } from 'lib/backend';
 import { revalidatePath } from 'next/cache';
 
 export async function handleAddFriend(formData: FormData) {
@@ -53,9 +53,8 @@ export async function handleCreateTicket(formData: FormData) {
 export async function handleReturnRequest(orderId: number, formData: FormData) {
     const reason = formData.get('reason') as string;
     const refundType = formData.get('refundType') as string;
-
-    // In a real app, we'd collect item counts from the form
-    const items = {};
+    const itemsRaw = formData.get('items') as string;
+    const items = itemsRaw ? JSON.parse(itemsRaw) : {};
 
     try {
         await submitReturnRequest(orderId, { items, reason, refundType });
@@ -63,5 +62,44 @@ export async function handleReturnRequest(orderId: number, formData: FormData) {
         return { success: true };
     } catch (e) {
         return { error: 'Failed to submit return' };
+    }
+}
+
+export async function handleReplyTicket(ticketId: number, formData: FormData) {
+    const message = formData.get('message') as string;
+    const user = await getCurrentUser();
+    const email = user?.email || 'customer@example.com';
+
+    try {
+        const { replyToTicket } = await import('lib/backend');
+        await replyToTicket(ticketId, {
+            senderType: 'USER',
+            senderId: email,
+            message: message
+        });
+        revalidatePath(`/account/support/${ticketId}`);
+        return { success: true };
+    } catch (e) {
+        return { error: 'Failed to send reply' };
+    }
+}
+
+export async function handleDeleteAddress(addressId: number) {
+    try {
+        await deleteAddress(addressId);
+        revalidatePath('/account/addresses');
+        return { success: true };
+    } catch (e) {
+        return { error: 'Failed to delete address' };
+    }
+}
+
+export async function handleCreateAddress(data: any) {
+    try {
+        await createAddress(data);
+        revalidatePath('/account/addresses');
+        return { success: true };
+    } catch (e) {
+        return { error: 'Failed to create address' };
     }
 }
