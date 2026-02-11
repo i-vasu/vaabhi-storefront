@@ -26,9 +26,9 @@ export function DeleteItemButton({
       <button
         type="submit"
         aria-label="Remove cart item"
-        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+        className="flex h-[24px] w-[24px] items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-all hover:border-red-600 hover:bg-red-600 hover:text-white dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-red-600 dark:hover:text-white"
       >
-        <XMarkIcon className="mx-[1px] h-4 w-4 text-white dark:text-black" />
+        <XMarkIcon className="mx-[1px] h-3 w-3" />
       </button>
       <p aria-live="polite" className="sr-only" role="status">
         {message}

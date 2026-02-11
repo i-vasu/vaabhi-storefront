@@ -53,7 +53,7 @@ export default function RazorpayButton({
             if (!res.success) throw new Error(res.data || 'Failed to create payment order');
 
             const options: RazorpayOptions = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || 'rzp_test_6XNqE6Lq6f6f6f', // Fallback for POC
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY!,
                 amount: amount * 100, // Amount in paise
                 currency: 'INR',
                 name: 'Vaabhi Store',
@@ -75,7 +75,7 @@ export default function RazorpayButton({
                     email: email
                 },
                 theme: {
-                    color: '#2563eb' // Blue-600
+                    color: '#8B0000' // Heritage Red
                 }
             };
 
@@ -91,10 +91,10 @@ export default function RazorpayButton({
     return (
         <button
             onClick={handlePayment}
-            className="mt-6 w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            className="mt-6 w-full rounded-[2rem] bg-heritage-red py-6 text-[10px] font-black uppercase tracking-[0.4em] text-white transition-all hover:bg-heritage-gold hover:text-heritage-black shadow-[0_10px_30px_rgba(139,0,0,0.3)] disabled:opacity-50 active:scale-95"
             disabled={loading}
         >
-            {loading ? 'Initializing...' : 'Pay with Razorpay'}
+            {loading ? 'INITIALIZING SETTLEMENT...' : 'SETTLE SECURELY'}
         </button>
     );
 }

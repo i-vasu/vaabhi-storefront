@@ -17,6 +17,7 @@ export type CartProduct = {
   handle: string;
   title: string;
   featuredImage: Image;
+  totalQuantity?: number;
 };
 
 export type CartItem = {
@@ -133,6 +134,9 @@ export type ShopifyProduct = {
   seo: SEO;
   tags: string[];
   updatedAt: string;
+  materialStory?: string;
+  stylistNotes?: string;
+  modelMeasurements?: string;
 };
 
 export type ShopifyCartOperation = {

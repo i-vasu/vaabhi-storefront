@@ -25,7 +25,10 @@ export function useAura(imageUrl: string | undefined) {
             canvas.height = 1;
 
             context.drawImage(img, 0, 0, 1, 1);
-            const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+            const data = context.getImageData(0, 0, 1, 1).data;
+            const r = data[0]!;
+            const g = data[1]!;
+            const b = data[2]!;
 
             // Update CSS variables for themed accents
             document.documentElement.style.setProperty('--aura-color', `rgb(${r}, ${g}, ${b})`);

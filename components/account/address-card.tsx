@@ -29,7 +29,7 @@ export function AddressCard({ address }: { address: AddressDTO }) {
         <div className="rounded-xl border border-neutral-200 p-6 transition-colors hover:border-black dark:border-neutral-800 dark:hover:border-white group">
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="font-bold">{address.building}</p>
+                    <p className="font-bold">{address.buildingName}</p>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">{address.street}</p>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
                         {address.city}, {address.state} {address.pincode}

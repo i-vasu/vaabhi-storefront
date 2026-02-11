@@ -1,5 +1,5 @@
-import { baseUrl, validateEnvironmentVariables } from 'lib/utils';
 import { getCollections, getPages, getProducts } from 'lib/backend';
+import { baseUrl, validateEnvironmentVariables } from 'lib/utils';
 import { MetadataRoute } from 'next';
 
 type Route = {
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   validateEnvironmentVariables();
 
-  const routesMap = [''].map((route) => ({
+  const routesMap = ['', '/ai-stylist', '/about', '/contact', '/faq', '/privacy-policy', '/terms-of-service', '/blog'].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString()
   }));

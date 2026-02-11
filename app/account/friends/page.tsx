@@ -55,7 +55,7 @@ export default async function FriendsPage() {
                     <h2 className="text-xl font-bold">Invite Someone</h2>
                     <p className="mt-2 text-sm text-neutral-400">Add a friend to your circle and unlock curated social features.</p>
 
-                    <form action={handleAddFriend} className="mt-8 space-y-4">
+                    <form action={handleAddFriend as any} className="mt-8 space-y-4">
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500">Friend's Email</label>
                             <input

@@ -1,31 +1,47 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { uploadMedia, virtualTryOn } from 'lib/backend';
 import { Camera, RefreshCcw, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function VirtualTryOn({ productImageUrl }: { productImageUrl: string | undefined }) {
     const [isOpen, setIsOpen] = useState(false);
     const [userImage, setUserImage] = useState<string | null>(null);
+    const [userFile, setUserFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [showResult, setShowResult] = useState(false);
+    const [resultImage, setResultImage] = useState<string | null>(null);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setUserFile(file);
             const reader = new FileReader();
             reader.onload = (e) => setUserImage(e.target?.result as string);
             reader.readAsDataURL(file);
         }
     };
 
-    const startTryOn = () => {
+    const startTryOn = async () => {
+        if (!userFile || !productImageUrl) return;
+
         setIsProcessing(true);
-        // Simulate AI processing
-        setTimeout(() => {
-            setIsProcessing(false);
+        try {
+            // 1. Upload user image to get a URL
+            const userPhotoUrl = await uploadMedia(userFile);
+
+            // 2. Call AI Try-On service
+            const result = await virtualTryOn(userPhotoUrl, productImageUrl);
+            setResultImage(result);
             setShowResult(true);
-        }, 3000);
+            toast.success('AI Try-On generated!');
+        } catch (error: any) {
+            toast.error(error.message || 'AI Processing failed');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -66,18 +82,24 @@ export default function VirtualTryOn({ productImageUrl }: { productImageUrl: str
                                 <div className="grid gap-8 md:grid-cols-2">
                                     {/* Photo Upload Area */}
                                     <div className="relative aspect-[3/4] overflow-hidden rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-black">
-                                        {userImage ? (
+                                        {showResult && resultImage ? (
+                                            <img src={resultImage} alt="Try-On Result" className="h-full w-full object-cover" />
+                                        ) : userImage ? (
                                             <img src={userImage} alt="User" className="h-full w-full object-cover" />
                                         ) : (
                                             <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center space-y-2">
                                                 <Camera className="h-8 w-8 text-neutral-400" />
-                                                <span className="text-xs text-neutral-500 text-center px-4">Upload your full-body photo for best results</span>
+                                                <span className="text-xs text-neutral-500 text-center px-4 font-black uppercase tracking-widest">Upload Portrait</span>
                                                 <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
                                             </label>
                                         )}
                                         {userImage && !isProcessing && (
                                             <button
-                                                onClick={() => setUserImage(null)}
+                                                onClick={() => {
+                                                    setUserImage(null);
+                                                    setUserFile(null);
+                                                    setShowResult(false);
+                                                }}
                                                 className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white backdrop-blur-md"
                                             >
                                                 <RefreshCcw className="h-4 w-4" />
@@ -89,42 +111,47 @@ export default function VirtualTryOn({ productImageUrl }: { productImageUrl: str
                                     <div className="flex flex-col justify-center space-y-4">
                                         {!showResult ? (
                                             <>
-                                                <div className="space-y-2">
-                                                    <h4 className="text-sm font-bold uppercase tracking-wider text-neutral-400">Step 1</h4>
-                                                    <p className="text-sm">Upload a well-lit photo of yourself standing straight.</p>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <h4 className="text-sm font-bold uppercase tracking-wider text-neutral-400">Step 2</h4>
-                                                    <p className="text-sm">Our AI will virtually overlay this garment on your frame.</p>
+                                                <div className="space-y-4">
+                                                    <div className="space-y-1">
+                                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Step 1</h4>
+                                                        <p className="text-sm font-medium">Upload a well-lit photo from your gallery.</p>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Step 2</h4>
+                                                        <p className="text-sm font-medium">Our AI Artisan will drape the garment onto your silhouette.</p>
+                                                    </div>
                                                 </div>
                                                 <button
-                                                    disabled={!userImage || isProcessing}
+                                                    disabled={!userFile || isProcessing}
                                                     onClick={startTryOn}
-                                                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-purple-600 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-black py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:opacity-90 disabled:opacity-50 dark:bg-white dark:text-black"
                                                 >
                                                     {isProcessing ? (
                                                         <>
                                                             <RefreshCcw className="h-4 w-4 animate-spin" />
-                                                            AI Processing...
+                                                            Processing Heritage...
                                                         </>
                                                     ) : (
-                                                        'Generate Try-On'
+                                                        'Generate Vision'
                                                     )}
                                                 </button>
                                             </>
                                         ) : (
-                                            <div className="space-y-4 text-center">
-                                                <div className="rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
-                                                    AI simulation complete!
+                                            <div className="space-y-6 text-center">
+                                                <div className="rounded-2xl bg-blue-50/50 p-6 dark:bg-blue-900/20">
+                                                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                                        Your personalized AI silhouette is ready.
+                                                    </p>
                                                 </div>
-                                                <p className="text-xs text-neutral-500 italic">
-                                                    *This is an AI-generated simulation for sizing and style visualization.
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                                                    *AI simulation for visual luxury reference.
                                                 </p>
                                                 <button
                                                     onClick={() => setShowResult(false)}
-                                                    className="text-sm font-medium text-purple-600 hover:underline"
+                                                    className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white"
                                                 >
-                                                    Try another photo
+                                                    <RefreshCcw className="h-3 w-3" />
+                                                    Restart Session
                                                 </button>
                                             </div>
                                         )}

@@ -1,0 +1,147 @@
+
+> dev
+> next dev --turbopack
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 15.6.0-canary.60 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://172.31.105.32:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ inlineCss
+     ✓ ppr
+     ✓ rdcForNavigations (enabled by `experimental.ppr`)
+     ✓ useCache
+
+ ✓ Starting...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 1229ms
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ✓ Ready in 6.5s
+ ○ Compiling / ...
+ ✓ Compiled / in 23s
+ ⨯ Error: Missing required environment variables: NEXT_PUBLIC_RAZORPAY_KEY, RAZORPAY_KEY_SECRET, NEXT_PUBLIC_SITE_NAME. Check your .env file or production environment.
+    at validateEnv (lib/env-check.ts:11:15)
+    at RootLayout (app/layout.tsx:60:14)
+   9 |     const missing = requiredEnvVars.filter((v) => !process.env[v]);
+  10 |     if (missing.length > 0) {
+> 11 |         throw new Error(
+     |               ^
+  12 |             `Missing required environment variables: ${missing.join(', ')}. ` +
+  13 |             `Check your .env file or production environment.`
+  14 |         ); {
+  digest: '1123087902'
+}
+ HEAD / 500 in 24644ms
+Error fetching products from Java: TypeError: fetch failed
+    at async getProducts (lib/backend-legacy/index.ts:148:17)
+    at async ThreeItemGrid (components/grid/three-items.tsx:46:25)
+  146 |
+  147 |   try {
+> 148 |     const res = await fetch(url, { cache: 'no-store' }); // Ensure fresh data
+      |                 ^
+  149 |     const data = await res.json();
+  150 |
+  151 |     // Handle Pageable Response (data.content) or List {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:8080
+      at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 8080
+  }
+}
+(node:473542) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Failed to proxy http://localhost:8080/api/personalization/trending?limit=8 Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Failed to proxy http://localhost:8080/api/personalization/best-sellers?limit=8 Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Failed to proxy http://localhost:8080/api/public/categories/hidden-homepage-carousel/products Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+getCollectionProducts error: Error: API Error: 500 Internal Server Error
+    at backendFetch (lib/backend/index.ts:140:23)
+    at async getCollectionProducts (lib/backend/index.ts:752:21)
+    at async Carousel (components/carousel.tsx:7:20)
+  138 |
+  139 |             if (!res.ok) {
+> 140 |                 throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      |                       ^
+  141 |             }
+  142 |
+  143 |             return await res.json();
+Failed to proxy http://localhost:8080/api/public/config Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:8080) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 8080
+}
+ ○ Compiling /_error ...
+getTenantConfig error: Error: API Error: 500 Internal Server Error
+    at backendFetch (lib/backend/index.ts:140:23)
+    at async getTenantConfig (lib/backend/index.ts:941:21)
+    at async Footer (components/layout/footer.tsx:14:18)
+  138 |
+  139 |             if (!res.ok) {
+> 140 |                 throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      |                       ^
+  141 |             }
+  142 |
+  143 |             return await res.json();
+ ✓ Compiled /_error in 2.9s

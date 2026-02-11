@@ -12,7 +12,15 @@ interface StorySection {
     align: 'left' | 'right';
 }
 
-export function ProductStorytelling({ productTitle, productImage }: { productTitle: string, productImage: string }) {
+export function ProductStorytelling({
+    productTitle,
+    productImage,
+    materialStory
+}: {
+    productTitle: string,
+    productImage: string,
+    materialStory?: string
+}) {
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -22,8 +30,8 @@ export function ProductStorytelling({ productTitle, productImage }: { productTit
     const sections: StorySection[] = [
         {
             title: "Artisanal Craftsmanship",
-            description: "Every thread is woven with precision, honoring centuries of tradition while embracing modern silhouettes. Our artisans spend weeks perfecting each pattern.",
-            image: productImage, // In a real app, these would be specific detail shots
+            description: materialStory || "Every thread is woven with precision, honoring centuries of tradition while embracing modern silhouettes. Our artisans spend weeks perfecting each pattern.",
+            image: productImage,
             align: 'left'
         },
         {
@@ -44,8 +52,8 @@ export function ProductStorytelling({ productTitle, productImage }: { productTit
                 viewport={{ once: true }}
                 className="text-center px-4"
             >
-                <span className="text-xs font-black uppercase tracking-[0.3em] text-blue-600 mb-4 block">The Design Ethos</span>
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 max-w-4xl mx-auto">
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-luxury-gold mb-4 block">The Design Ethos</span>
+                <h2 className="text-5xl md:text-7xl font-serif font-bold tracking-tighter mb-8 max-w-4xl mx-auto">
                     Designed for the <span className="text-neutral-400">Extraordinary.</span>
                 </h2>
                 <p className="text-lg text-neutral-500 max-w-2xl mx-auto">
@@ -63,7 +71,7 @@ export function ProductStorytelling({ productTitle, productImage }: { productTit
                         viewport={{ once: true }}
                         className="flex-1"
                     >
-                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-neutral-100 dark:bg-neutral-900">
+                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-neutral-100 dark:bg-neutral-900">
                             <Image
                                 src={section.image}
                                 alt={section.title}
@@ -79,14 +87,14 @@ export function ProductStorytelling({ productTitle, productImage }: { productTit
                         viewport={{ once: true }}
                         className="flex-1 space-y-6"
                     >
-                        <h3 className="text-3xl md:text-5xl font-bold tracking-tight">{section.title}</h3>
-                        <p className="text-lg text-neutral-500 leading-relaxed">
+                        <h3 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">{section.title}</h3>
+                        <p className="text-lg text-neutral-500 leading-relaxed font-light">
                             {section.description}
                         </p>
                         <div className="pt-4">
-                            <div className="h-px w-24 bg-blue-600" />
+                            <div className="h-px w-24 bg-luxury-gold" />
                         </div>
-                    </motion.div>section
+                    </motion.div>
                 </section>
             ))}
 
@@ -105,9 +113,9 @@ export function ProductStorytelling({ productTitle, productImage }: { productTit
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 viewport={{ once: true }}
-                                className="space-y-2"
+                                className="space-y-2 text-center md:text-left"
                             >
-                                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">{item.label}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-luxury-gold">{item.label}</p>
                                 <h4 className="text-xl font-bold">{item.val}</h4>
                                 <p className="text-sm text-neutral-500">{item.desc}</p>
                             </motion.div>

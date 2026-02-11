@@ -5,8 +5,7 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('vaabhi_token');
     const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
         request.nextUrl.pathname.startsWith('/register');
-    const isProtectedPage = request.nextUrl.pathname.startsWith('/account') ||
-        request.nextUrl.pathname.startsWith('/checkout');
+    const isProtectedPage = request.nextUrl.pathname.startsWith('/account');
 
     if (isProtectedPage && !token) {
         const loginUrl = new URL('/login', request.url);

@@ -1,6 +1,5 @@
 'use client';
 
-import { StarIcon as StarOutline } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { addReview } from 'lib/backend';
 import { useState } from 'react';
@@ -51,86 +50,80 @@ export default function ProductReviews({
 
     return (
         <div className="mt-12 border-t border-neutral-200 pt-12 dark:border-neutral-800">
-            <h2 className="text-2xl font-bold">Customer Reviews</h2>
+            <h2 className="text-2xl font-serif font-bold uppercase tracking-widest text-center mb-12">Customer Reviews</h2>
 
-            <div className="mt-8 grid gap-12 lg:grid-cols-2">
+            <div className="mt-8 grid gap-16 lg:grid-cols-2">
                 {/* Review List */}
                 <div className="space-y-8">
                     {reviews.length > 0 ? (
-                        reviews.map((review) => (
-                            <div key={review.reviewId} className="border-b border-neutral-100 pb-8 dark:border-neutral-800">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex">
+                        reviews.map((review, index) => (
+                            <div key={index} className="border-b border-neutral-100 pb-8 dark:border-neutral-800">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex text-heritage-gold">
                                         {[...Array(5)].map((_, i) => (
-                                            i < review.rating ? (
-                                                <StarIcon key={i} className="h-4 w-4 text-yellow-500" />
-                                            ) : (
-                                                <StarOutline key={i} className="h-4 w-4 text-neutral-300" />
-                                            )
+                                            <StarIcon key={i} className={`h-4 w-4 ${i < review.rating ? 'text-heritage-gold' : 'text-neutral-300 dark:text-neutral-700'}`} />
                                         ))}
                                     </div>
-                                    <span className="text-sm font-bold">{review.userName}</span>
+                                    <span className="text-xs font-bold uppercase tracking-widest">{review.userName || "Anonymous"}</span>
                                 </div>
-                                <p className="mt-2 text-sm text-neutral-500">{review.comment}</p>
-                                <p className="mt-2 text-xs text-neutral-400">
-                                    {new Date(review.createdAt).toLocaleDateString()}
+                                <p className="text-sm text-neutral-600 dark:text-neutral-400 italic font-medium leading-relaxed">"{review.comment}"</p>
+                                <p className="mt-2 text-[10px] uppercase tracking-widest text-neutral-400">
+                                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}
                                 </p>
                             </div>
                         ))
                     ) : (
-                        <p className="text-neutral-500">No reviews yet. Be the first to review!</p>
+                        <p className="text-neutral-500 italic text-center">No reviews yet. Be the first to review!</p>
                     )}
                 </div>
 
                 {/* Review Form */}
-                <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-black">
-                    <h3 className="text-lg font-bold">Write a Review</h3>
-                    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                <div className="bg-neutral-50 p-8 dark:bg-neutral-900/40">
+                    <h3 className="text-lg font-serif font-bold uppercase tracking-widest mb-6">Write a Review</h3>
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-neutral-500">Rating</label>
-                            <div className="mt-1 flex gap-1">
+                            <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Rating</label>
+                            <div className="flex gap-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <button
                                         key={star}
                                         type="button"
                                         onClick={() => setRating(star)}
-                                        className="hover:scale-110 transition-transform"
+                                        className="hover:scale-110 transition-transform focus:outline-none"
                                     >
-                                        {star <= rating ? (
-                                            <StarIcon className="h-6 w-6 text-yellow-500" />
-                                        ) : (
-                                            <StarOutline className="h-6 w-6 text-neutral-300" />
-                                        )}
+                                        <StarIcon className={`h-6 w-6 ${star <= rating ? 'text-heritage-gold' : 'text-neutral-300 dark:text-neutral-700'}`} />
                                     </button>
                                 ))}
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-neutral-500">Your Name</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Your Name</label>
                             <input
                                 required
                                 value={userName}
                                 onChange={(e) => setUserName(e.target.value)}
-                                className="mt-1 w-full rounded-md border border-neutral-200 bg-white p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                className="w-full border-b border-neutral-300 bg-transparent py-2 text-sm focus:border-black focus:outline-none dark:border-neutral-700 dark:focus:border-white"
+                                placeholder="Enter your name"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-neutral-500">Comment</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Comment</label>
                             <textarea
                                 required
                                 rows={4}
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                className="mt-1 w-full rounded-md border border-neutral-200 bg-white p-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                                className="w-full border-b border-neutral-300 bg-transparent py-2 text-sm focus:border-black focus:outline-none dark:border-neutral-700 dark:focus:border-white resize-none"
+                                placeholder="Share your thoughts..."
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full rounded-full bg-black py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 dark:bg-white dark:text-black"
+                            className="w-full bg-heritage-red py-4 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-heritage-gold hover:text-black disabled:opacity-50 shadow-xl"
                         >
                             {submitting ? 'Submitting...' : 'Submit Review'}
                         </button>

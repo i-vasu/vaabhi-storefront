@@ -8,7 +8,7 @@ import { Product } from 'lib/backend';
 import SizeGuide from './size-guide';
 import { VariantSelector } from './variant-selector';
 import VirtualTryOn from './virtual-try-on';
-import WishlistButton from './wishlist-button';
+import { WishlistButton } from './wishlist-button';
 
 export function ProductDescription({ product }: { product: Product }) {
   return (
@@ -17,28 +17,19 @@ export function ProductDescription({ product }: { product: Product }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8 flex flex-col border-b pb-8 dark:border-neutral-700"
+        className="mb-6 flex flex-col pb-6 border-b border-neutral-100 dark:border-neutral-800"
       >
-        <h1 className="mb-4 text-5xl md:text-6xl font-bold tracking-tighter leading-none" style={{ color: 'var(--aura-contrast, inherit)' }}>{product.title}</h1>
-        <div className="flex items-center gap-6">
-          <div
-            className="w-auto rounded-full px-8 py-3 text-xl font-black text-white shadow-2xl transition-transform hover:scale-105"
-            style={{ backgroundColor: 'var(--aura-color, #2563eb)', color: 'var(--aura-contrast, #fff)' }}
-          >
+        <h1 className="mb-2 text-2xl md:text-3xl lg:text-4xl font-serif font-black tracking-tight text-heritage-black dark:text-white leading-tight uppercase">{product.title}</h1>
+        <div className="flex items-center gap-6 mt-2">
+          <div className="text-xl font-medium tracking-wider text-neutral-800 dark:text-neutral-200">
             <Price
               amount={product.priceRange.maxVariantPrice.amount}
               currencyCode={product.priceRange.maxVariantPrice.currencyCode}
             />
           </div>
           {(product as any).totalQuantity > 0 && (product as any).totalQuantity < 10 && (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-              <span className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
-                Only {(product as any).totalQuantity} left in stock
-              </span>
+            <div className="text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400">
+               Only {(product as any).totalQuantity} left
             </div>
           )}
         </div>
@@ -59,12 +50,31 @@ export function ProductDescription({ product }: { product: Product }) {
             html={product.descriptionHtml}
           />
         ) : null}
-        <div className="flex gap-4">
-          <div className="group relative flex-1">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-25 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-200" style={{ backgroundImage: 'linear-gradient(to right, var(--aura-color), var(--aura-color-soft))' }}></div>
-            <div className="relative">
-              <AddToCart product={product} />
+
+        {/* Luxury Storytelling Sections */}
+        <div className="space-y-6 mb-8">
+          {product.materialStory && (
+            <div className="border-l-2 border-heritage-red pl-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-heritage-red mb-1">The Material Story</h4>
+              <p className="text-sm font-medium leading-relaxed text-heritage-black">{product.materialStory}</p>
             </div>
+          )}
+          {product.stylistNotes && (
+            <div className="border-l-2 border-heritage-gold pl-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-heritage-gold mb-1">Stylist Notes</h4>
+              <p className="text-sm font-medium leading-relaxed italic text-heritage-black">{product.stylistNotes}</p>
+            </div>
+          )}
+          {product.modelMeasurements && (
+            <div className="border-l-2 border-heritage-black/20 pl-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-heritage-black/60 mb-1">Size & Fit</h4>
+              <p className="text-sm font-medium leading-relaxed text-heritage-black opacity-70">{product.modelMeasurements}</p>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-4">
+          <div className="flex-1">
+             <AddToCart product={product} />
           </div>
           <WishlistButton product={product} />
         </div>

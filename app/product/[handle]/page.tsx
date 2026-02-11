@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { GridTileImage } from 'components/grid/tile';
 import Footer from 'components/layout/footer';
+import Price from 'components/price';
 import AuraInitializer from 'components/product/aura-initializer';
 import { Gallery } from 'components/product/gallery';
 import { ProductProvider } from 'components/product/product-context';
@@ -91,9 +92,16 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
           __html: JSON.stringify(productJsonLd)
         }}
       />
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
-        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
-          <div className="h-full w-full basis-full lg:basis-4/6">
+      <div className="mx-auto max-w-[1920px] px-4 md:px-12">
+        <nav className="mb-8 py-4 text-xs font-bold uppercase tracking-widest text-neutral-400">
+          <Link href="/" className="hover:text-black transition-colors">Home</Link>
+          <span className="mx-2">/</span>
+          <Link href="/search" className="hover:text-black transition-colors">Collection</Link>
+          <span className="mx-2">/</span>
+          <span className="text-neutral-900 request dark:text-white">{product.title}</span>
+        </nav>
+        <div className="flex flex-col lg:flex-row lg:gap-16">
+          <div className="h-full w-full basis-full lg:basis-7/12">
             <Suspense
               fallback={
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
@@ -108,14 +116,18 @@ export default async function ProductPage(props: { params: Promise<{ handle: str
             </Suspense>
           </div>
 
-          <div className="basis-full lg:basis-2/6">
+          <div className="basis-full lg:basis-5/12 lg:sticky lg:top-24 lg:self-start">
             <Suspense fallback={null}>
               <ProductDescription product={product} />
             </Suspense>
           </div>
         </div>
 
-        <ProductStorytelling productTitle={product.title} productImage={product.featuredImage?.url} />
+        <ProductStorytelling
+          productTitle={product.title}
+          productImage={product.featuredImage?.url}
+          materialStory={product.materialStory}
+        />
 
         <RelatedProducts id={product.id} />
 
@@ -139,30 +151,41 @@ async function RelatedProducts({ id }: { id: string }) {
   if (!relatedProducts.length) return null;
 
   return (
-    <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold uppercase tracking-tighter">Related Styles</h2>
-      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
+    <div className="py-12 border-t border-neutral-200 dark:border-neutral-800">
+      <h2 className="mb-8 text-2xl font-serif font-bold uppercase tracking-widest text-center">Complete The Look</h2>
+      <ul className="flex w-full gap-8 overflow-x-auto pb-4 pt-1 no-scrollbar">
         {relatedProducts.map((product) => (
           <li
             key={product.handle}
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
+            className="aspect-[3/4] w-64 flex-none"
           >
             <Link
-              className="relative h-full w-full"
+              className="group block h-full w-full"
               href={`/product/${product.handle}`}
               prefetch={true}
             >
-              <GridTileImage
-                alt={product.title}
-                label={{
-                  title: product.title,
-                  amount: product.priceRange.maxVariantPrice.amount,
-                  currencyCode: product.priceRange.maxVariantPrice.currencyCode
-                }}
-                src={product.featuredImage?.url}
-                fill
-                sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
-              />
+              <div className="relative h-full w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                  <GridTileImage
+                    alt={product.title}
+                    src={product.featuredImage?.url}
+                    fill
+                    sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
+                    isInteractive={false}
+                    active={false}
+                  />
+              </div>
+              <div className="mt-4 text-center">
+                  <h3 className="text-sm font-medium text-neutral-900 dark:text-white line-clamp-1">
+                    {product.title}
+                  </h3>
+                  <div className="mt-1 flex justify-center">
+                       <Price
+                          className="font-serif text-sm text-neutral-500 dark:text-neutral-400"
+                          amount={product.priceRange.maxVariantPrice.amount}
+                          currencyCode={product.priceRange.maxVariantPrice.currencyCode}
+                       />
+                  </div>
+              </div>
             </Link>
           </li>
         ))}
@@ -182,24 +205,41 @@ async function RecentlyViewedProducts() {
   if (!products.length) return null;
 
   return (
-    <div className="py-8 border-t border-neutral-100 dark:border-neutral-800">
-      <h2 className="mb-4 text-2xl font-bold uppercase tracking-tighter">Recently Viewed</h2>
-      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
+    <div className="py-12 border-t border-neutral-200 dark:border-neutral-800">
+      <h2 className="mb-8 text-2xl font-serif font-bold uppercase tracking-widest text-center">Recently Viewed</h2>
+      <ul className="flex w-full gap-8 overflow-x-auto pb-4 pt-1 no-scrollbar">
         {products.map((product) => (
           <li
             key={product.id}
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6"
+            className="aspect-[3/4] w-64 flex-none"
           >
-            <Link
-              className="relative h-full w-full"
+             <Link
+              className="group block h-full w-full"
               href={`/product/${product.handle}`}
+              prefetch={true}
             >
-              <GridTileImage
-                alt={product.title}
-                src={product.featuredImage?.url}
-                fill
-                sizes="(min-width: 1024px) 15vw, (min-width: 768px) 25vw, 50vw"
-              />
+              <div className="relative h-full w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                  <GridTileImage
+                    alt={product.title}
+                    src={product.featuredImage?.url}
+                    fill
+                    sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
+                    isInteractive={false}
+                    active={false}
+                  />
+              </div>
+              <div className="mt-4 text-center">
+                  <h3 className="text-sm font-medium text-neutral-900 dark:text-white line-clamp-1">
+                    {product.title}
+                  </h3>
+                  <div className="mt-1 flex justify-center">
+                       <Price
+                          className="font-serif text-sm text-neutral-500 dark:text-neutral-400"
+                          amount={product.priceRange.maxVariantPrice.amount}
+                          currencyCode={product.priceRange.maxVariantPrice.currencyCode}
+                       />
+                  </div>
+              </div>
             </Link>
           </li>
         ))}

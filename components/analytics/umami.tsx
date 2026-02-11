@@ -20,13 +20,19 @@ export default function UmamiAnalytics() {
     );
 }
 
+import { sendGTMEvent } from './gtm';
+
 /**
- * Utility for tracking custom events in Umami
+ * Utility for tracking custom events in Umami and GTM
  * @param eventName Name of the event
  * @param eventData Metadata for the event
  */
 export const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
+    // 1. Track in Umami
     if (typeof window !== 'undefined' && (window as any).umami) {
         (window as any).umami.track(eventName, eventData);
     }
+
+    // 2. Track in GTM
+    sendGTMEvent(eventName, eventData);
 };

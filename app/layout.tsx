@@ -1,3 +1,4 @@
+import GoogleTagManager, { GTMNoScript } from 'components/analytics/gtm';
 import { AuthProvider } from 'components/auth-context';
 import { CartProvider } from 'components/cart/cart-context';
 import ErrorBoundary from 'components/error-boundary';
@@ -7,14 +8,27 @@ import CommandBar from 'components/search/command-bar';
 import ThemeInitializer from 'components/theme-initializer';
 import { WelcomeToast } from 'components/welcome-toast';
 import { WishlistProvider } from 'components/wishlist-context';
-import { GeistSans } from 'geist/font/sans';
 import { getCart, getTenantConfig } from 'lib/backend';
+import { CurrencyProvider } from 'lib/currency-context';
 import { validateEnv } from 'lib/env-check';
 import { baseUrl } from 'lib/utils';
 import { Metadata } from 'next';
+import { Inter, Playfair_Display } from 'next/font/google';
 import { ReactNode } from 'react';
 import { Toaster } from 'sonner';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter'
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair'
+});
 
 const { SITE_NAME } = process.env;
 
@@ -52,6 +66,8 @@ export const metadata: Metadata = {
   }
 };
 
+import { MobileBottomNav } from 'components/layout/mobile-bottom-nav';
+
 export default async function RootLayout({
   children
 }: {
@@ -63,15 +79,20 @@ export default async function RootLayout({
   const tenant = await getTenantConfig();
 
   return (
-    <html lang="en" className={GeistSans.variable}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+       <head>
+          <GoogleTagManager />
+      </head>
       <ThemeInitializer accentColor={tenant.accentColor} />
-      <UmamiAnalytics />
-      <body className="bg-neutral-50 text-black selection:bg-[var(--accent-color,teal)] dark:bg-neutral-900 dark:text-white dark:selection:bg-[var(--accent-color,pink)] dark:selection:text-white">
+      <body className="bg-heritage-cream text-heritage-black selection:bg-heritage-red selection:text-white antialiased">
+        <GTMNoScript />
+        <CurrencyProvider>
         <AuthProvider>
           <WishlistProvider>
             <CartProvider cartPromise={cart}>
               <Navbar />
               <CommandBar />
+              <MobileBottomNav />
               <main>
                 <ErrorBoundary>
                   <PageTransition>
@@ -84,6 +105,7 @@ export default async function RootLayout({
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

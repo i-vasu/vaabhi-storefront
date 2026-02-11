@@ -7,10 +7,10 @@ export function ProductListCarousel({ products, title }: { products: Product[], 
 
     return (
         <div className="w-full pb-10">
-            <div className="flex items-center justify-between px-4 pb-4 sm:px-6 lg:px-8">
-                <h2 className="text-2xl font-black uppercase tracking-tighter">{title}</h2>
-                <Link href="/search" className="text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-black hover:underline">
-                    View All
+            <div className="flex items-center justify-between px-4 pb-8 sm:px-6 lg:px-8">
+                <h2 className="text-2xl font-black uppercase tracking-[0.2em] font-serif border-l-4 border-heritage-red pl-4">{title}</h2>
+                <Link href="/search" className="text-[10px] font-black uppercase tracking-[0.2em] text-heritage-red hover:text-heritage-gold transition-colors">
+                    View Dossier
                 </Link>
             </div>
             <div className="w-full overflow-x-auto">

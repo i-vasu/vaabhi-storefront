@@ -1,6 +1,8 @@
 const requiredEnvVars = [
     'NEXT_PUBLIC_API_URL',
-    'RAZORPAY_KEY_ID'
+    'NEXT_PUBLIC_RAZORPAY_KEY',
+    'RAZORPAY_KEY_SECRET',
+    'NEXT_PUBLIC_SITE_NAME'
 ];
 
 export function validateEnv() {

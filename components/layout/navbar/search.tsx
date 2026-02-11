@@ -1,3 +1,5 @@
+'use client';
+
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Form from 'next/form';
 import Image from 'next/image';
@@ -45,21 +47,22 @@ export default function Search() {
 
   return (
     <div className="relative w-full lg:w-80 xl:w-full" ref={dropdownRef}>
-      <Form action="/search" className="w-full">
+      <Form action="/search" className="w-full relative group">
         <input
           type="text"
           name="q"
-          placeholder="Search for products..."
+          placeholder="SEARCH"
           autoComplete="off"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.length > 1 && setIsOpen(true)}
-          className="text-md w-full rounded-lg border bg-white px-4 py-2 text-black placeholder:text-neutral-500 md:text-sm dark:border-neutral-800 dark:bg-transparent dark:text-white dark:placeholder:text-neutral-400"
+          className="w-full border-b border-neutral-300 bg-transparent py-2 pl-2 pr-10 text-xs font-bold uppercase tracking-widest text-black placeholder:text-neutral-400 focus:border-black focus:outline-none dark:border-neutral-700 dark:text-white dark:focus:border-white transition-colors"
         />
-        <div className="absolute right-0 top-0 mr-3 flex h-full items-center gap-2">
+        <div className="absolute right-0 top-0 flex h-full items-center gap-3">
           <VisualSearch />
-          <div className="h-4 w-[1px] bg-neutral-200 dark:bg-neutral-800" />
-          <MagnifyingGlassIcon className="h-4" />
+          <button type="submit" aria-label="Search">
+            <MagnifyingGlassIcon className="h-5 text-neutral-500 group-hover:text-black dark:group-hover:text-white transition-colors" />
+          </button>
         </div>
       </Form>
 

@@ -4,12 +4,12 @@ export default function Loading() {
   return (
     <>
       <div className="mb-4 h-6" />
-      <Grid className="grid-cols-2 lg:grid-cols-3">
+      <Grid className="grid-cols-2 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
         {Array(12)
           .fill(0)
           .map((_, index) => {
             return (
-              <Grid.Item key={index} className="animate-pulse bg-neutral-100 dark:bg-neutral-800" />
+              <Grid.Item key={index} className="animate-pulse bg-neutral-100 dark:bg-neutral-800 aspect-[3/4] rounded-sm" />
             );
           })}
       </Grid>

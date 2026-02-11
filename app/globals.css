@@ -3,6 +3,27 @@
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
 
+@theme {
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-inter);
+
+  --color-heritage-red: #8B0000;
+  --color-heritage-red-light: #B22222;
+  --color-heritage-red-dark: #660000;
+  --color-heritage-gold: #D4AF37;
+  --color-heritage-gold-light: #F9E79F;
+  --color-heritage-gold-dark: #B8860B;
+  --color-heritage-cream: #FFFBF0;
+  --color-heritage-black: #1A0505;
+
+  /* Aliases for compatibility */
+  --color-luxury-black: var(--color-heritage-black);
+  --color-luxury-gold: var(--color-heritage-gold);
+  --color-luxury-cream: var(--color-heritage-cream);
+  --color-luxury-gray: #333333;
+  --color-primary: var(--color-heritage-red);
+}
+
 @layer base {
   *,
   ::after,
@@ -11,11 +32,43 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+  
+  body {
+    background-color: var(--color-heritage-cream);
+    color: var(--color-heritage-black);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 900;
+    color: var(--color-heritage-red) !important;
+    letter-spacing: -0.01em;
+  }
+
+  p, li, div {
+    color: var(--color-heritage-black);
+  }
+
+  span, label, b, strong {
+    color: inherit;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-heritage-black);
+    color: var(--color-heritage-cream);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-heritage-gold) !important;
+  }
+  p, li, div {
+    color: var(--color-heritage-cream);
   }
 }
 
@@ -28,5 +81,5 @@
 a,
 input,
 button {
-  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-luxury-gold focus-visible:ring-offset-2 focus-visible:ring-offset-luxury-cream dark:focus-visible:ring-luxury-gold dark:focus-visible:ring-offset-luxury-black;
 }

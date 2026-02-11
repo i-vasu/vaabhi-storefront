@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 export interface UserSession {
     email: string;
     userId?: number;
+    name?: string;
 }
 
 export async function getCurrentUser(): Promise<UserSession | null> {

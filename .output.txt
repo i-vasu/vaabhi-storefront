@@ -1,0 +1,263 @@
+
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                %5Bhandle%5D
+dar--l          2/7/2026  10:35 AM                about
+dar--l          2/7/2026  10:35 AM                account
+dar--l          2/7/2026  10:35 AM                ai-stylist
+dar--l          2/7/2026  10:35 AM                api
+dar--l          2/7/2026  10:35 AM                blog
+dar--l          2/7/2026  10:35 AM                checkout
+dar--l          2/7/2026  10:35 AM                contact
+dar--l          2/7/2026  10:35 AM                faq
+dar--l          2/7/2026  10:35 AM                forgot-password
+dar--l          2/7/2026  10:35 AM                login
+dar--l          2/7/2026  10:35 AM                privacy-policy
+dar--l          2/7/2026  10:35 AM                product
+dar--l          2/7/2026  10:35 AM                register
+dar--l          2/7/2026  10:35 AM                reset-password
+dar--l          2/7/2026  10:35 AM                search
+dar--l          2/7/2026  10:35 AM                terms-of-service
+dar--l          2/7/2026  10:35 AM                verify-email
+dar--l          2/7/2026  10:35 AM                [page]
+-a---l          2/3/2026   8:02 AM           1618 error.tsx
+-a---l        12/16/2025   3:40 AM          15086 favicon.ico
+-a---l        12/16/2025   3:40 AM            711 globals.css
+-a---l          2/2/2026   8:21 PM           3007 layout.tsx
+-a---l         1/25/2026   5:17 PM            727 loading.tsx
+-a---l          2/3/2026   8:00 AM           1242 not-found.tsx
+-a---l         1/25/2026   4:58 PM            133 opengraph-image.tsx
+-a---l          2/3/2026   8:02 AM           2147 page.tsx
+-a---l          2/3/2026   7:56 AM            280 robots.ts
+-a---l          2/3/2026   9:30 AM           1439 sitemap.ts
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\%5Bhandle%5D
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   5:36 PM            914 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\about
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:25 AM           5606 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                addresses
+dar--l          2/7/2026  10:35 AM                friends
+dar--l          2/7/2026  10:35 AM                offers
+dar--l          2/7/2026  10:35 AM                orders
+dar--l          2/7/2026  10:35 AM                profile
+dar--l          2/7/2026  10:35 AM                returns
+dar--l          2/7/2026  10:35 AM                rewards
+dar--l          2/7/2026  10:35 AM                support
+dar--l          2/7/2026  10:35 AM                wallet
+dar--l          2/7/2026  10:35 AM                wishlist
+-a---l         1/27/2026   9:29 AM           3391 actions.ts
+-a---l          2/3/2026   9:17 AM           4005 layout.tsx
+-a---l          2/3/2026   9:02 AM          12216 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\accou
+    nt\addresses
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:36 AM                new
+-a---l         1/25/2026   5:58 PM           1570 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\accou
+    nt\addresses\new
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/27/2026   9:30 AM           6273 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\friends
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/2/2026   7:58 PM           4679 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\offers
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/26/2026   9:33 PM           3208 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\orders
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:36 AM                [id]
+-a---l          2/3/2026   9:18 AM           4725 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\accou
+    nt\orders\[id]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:36 AM                return
+-a---l          2/4/2026   8:40 AM           8110 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\accou
+    nt\orders\[id]\return
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/26/2026   9:33 PM           1151 page.tsx
+-a---l         1/27/2026   9:45 PM           7093 ReturnForm.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\profile
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:25 AM           1746 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\returns
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/27/2026   9:46 PM           3721 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\rewards
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/2/2026   7:58 PM           4538 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\support
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:36 AM                [id]
+-a---l          2/2/2026   7:59 PM           4971 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\accou
+    nt\support\[id]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/27/2026   8:47 AM           1588 page.tsx
+-a---l         1/27/2026   9:42 PM           4163 TicketDetail.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\wallet
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/27/2026   9:37 AM           4221 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\account\wishlist
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:17 AM           2027 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\ai-stylist
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/4/2026   8:24 AM          15384 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\api
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                coupons
+dar--l          2/7/2026  10:35 AM                health
+dar--l          2/7/2026  10:35 AM                revalidate
+dar--l          2/7/2026  10:35 AM                search
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\api\coupons
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   5:04 PM            345 route.ts
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\api\health
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   4:58 PM            256 route.ts
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\api\revalidate
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   4:58 PM            198 route.ts
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\api\search
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   5:04 PM            510 route.ts
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\blog
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                [id]
+-a---l         1/25/2026   4:58 PM           3347 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\blog\[id]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   4:58 PM           2327 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\checkout
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                success
+-a---l          2/6/2026  10:02 PM          25300 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\checkout\success
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/27/2026   9:32 AM           6498 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\contact
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:30 AM           7451 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\faq
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:30 AM           3649 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\forgot-password
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/26/2026   9:22 PM           3732 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\login
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/6/2026  10:10 PM           7412 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\privacy-policy
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   7:55 AM           2024 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\product
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                [handle]
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\product\[handle]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   8:51 AM           7522 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\register
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   9:17 AM           9427 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\reset-password
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/26/2026   9:22 PM           4145 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\search
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l          2/7/2026  10:35 AM                [collection]
+-a---l         1/25/2026   4:58 PM            367 children-wrapper.tsx
+-a---l         1/25/2026   4:58 PM           1142 layout.tsx
+-a---l         1/25/2026   4:58 PM            427 loading.tsx
+-a---l         1/25/2026   4:58 PM           1588 page.tsx
+    Directory: C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\searc
+    h\[collection]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/2/2026   7:55 PM            426 opengraph-image.tsx
+-a---l         1/25/2026   4:58 PM           1577 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\terms-of-service
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l          2/3/2026   7:56 AM           1995 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\verify-email
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/26/2026   9:34 PM           3601 page.tsx
+    Directory:
+    C:\Users\alway\OneDrive\Desktop\Vasu\vaabhi-storefront\app\[page]
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         1/25/2026   4:58 PM            294 layout.tsx
+-a---l          2/2/2026   7:54 PM            391 opengraph-image.tsx
+-a---l         1/25/2026   4:58 PM           1223 page.tsx

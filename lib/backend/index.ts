@@ -23,18 +23,7 @@ export function getImageUrl(image: string | undefined): string {
     return `${baseUrl}/public/products/image/${image}`;
 }
 
-async function setBackendCookie(name: string, value: string) {
-    if (typeof window !== 'undefined') {
-        document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}`; // 30 days
-        return;
-    }
-    try {
-        const { cookies } = await import('next/headers');
-        (await cookies()).set(name, value, { path: '/', maxAge: 60 * 60 * 24 * 30 });
-    } catch (e) { }
-}
-
-async function getBackendCookie(name: string): Promise<string | undefined> {
+export async function getBackendCookie(name: string): Promise<string | undefined> {
     if (typeof window !== 'undefined') {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         const value = match?.[2];
@@ -46,6 +35,17 @@ async function getBackendCookie(name: string): Promise<string | undefined> {
     } catch (e) {
         return undefined;
     }
+}
+
+export async function setBackendCookie(name: string, value: string) {
+    if (typeof window !== 'undefined') {
+        document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}`; // 30 days
+        return;
+    }
+    try {
+        const { cookies } = await import('next/headers');
+        (await cookies()).set(name, value, { path: '/', maxAge: 60 * 60 * 24 * 30 });
+    } catch (e) { }
 }
 
 async function getBackendEmail(): Promise<string> {
@@ -73,6 +73,11 @@ interface ProductDTO {
     specialPrice: number;
     reviews?: any[];
     sizeGuide?: Record<string, string>;
+    materialStory?: string;
+    stylistNotes?: string;
+    modelMeasurements?: string;
+    variants?: any[];
+    tags?: string[];
 }
 
 interface CartDTO {
@@ -93,22 +98,27 @@ export interface BlogDTO {
 export interface AddressDTO {
     addressId: number;
     street: string;
-    building: string;
+    buildingName: string;
     city: string;
     state: string;
     country: string;
     pincode: string;
+    receiverPhoneNumber?: string;
 }
 
 // --- Fetch Wrapper ---
 
-async function backendFetch<T>(path: string, options?: RequestInit, retries = 3): Promise<T> {
+async function backendFetch<T>(path: string, options?: RequestInit, retries = process.env.NODE_ENV === 'development' ? 1 : 3): Promise<T> {
     const token = await getBackendCookie('vaabhi_token');
 
     for (let i = 0; i < retries; i++) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
         try {
             const res = await fetch(`${API_URL}${path}`, {
                 ...options,
+                signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': API_VERSION_HEADER,
@@ -117,8 +127,9 @@ async function backendFetch<T>(path: string, options?: RequestInit, retries = 3)
                 }
             });
 
+            clearTimeout(timeoutId);
+
             if (res.status === 429) {
-                // Rate limited, wait and retry
                 const retryAfter = parseInt(res.headers.get('X-Rate-Limit-Retry-After-Seconds') || '5');
                 await new Promise(r => setTimeout(r, retryAfter * 1000));
                 continue;
@@ -129,7 +140,11 @@ async function backendFetch<T>(path: string, options?: RequestInit, retries = 3)
             }
 
             return await res.json();
-        } catch (err) {
+        } catch (err: any) {
+            clearTimeout(timeoutId);
+            if (err.name === 'AbortError') {
+                throw new Error('Request timeout: The server took too long to respond.');
+            }
             if (i === retries - 1) throw err;
             const backoff = Math.pow(2, i) * 1000;
             await new Promise(r => setTimeout(r, backoff));
@@ -142,20 +157,18 @@ async function backendFetch<T>(path: string, options?: RequestInit, retries = 3)
 
 function mapProductToShopify(dto: ProductDTO): Product {
     const price = (dto.specialPrice > 0 ? dto.specialPrice : dto.price).toString();
+    const originalPrice = dto.price.toString();
 
-    return {
-        id: dto.productId.toString(),
-        handle: dto.productId.toString(), // Using ID as handle
-        availableForSale: dto.quantity > 0,
-        title: dto.productName,
-        description: dto.description || '',
-        descriptionHtml: dto.description || '',
-        options: [],
-        priceRange: {
-            maxVariantPrice: { amount: price, currencyCode: 'INR' },
-            minVariantPrice: { amount: price, currencyCode: 'INR' }
-        },
-        variants: [
+    // Map variants if they exist
+    const variants = dto.variants && dto.variants.length > 0
+        ? dto.variants.map((v: any) => ({
+            id: v.variantId.toString(),
+            title: v.variantName || 'Default',
+            availableForSale: v.quantity > 0,
+            selectedOptions: v.options || [],
+            price: { amount: (v.price || price).toString(), currencyCode: 'INR' }
+        }))
+        : [
             {
                 id: dto.productId.toString(),
                 title: 'Default',
@@ -163,7 +176,24 @@ function mapProductToShopify(dto: ProductDTO): Product {
                 selectedOptions: [],
                 price: { amount: price, currencyCode: 'INR' }
             }
-        ],
+        ];
+
+    // Extract options from variants
+    const options = (dto as any).options || [];
+
+    return {
+        id: dto.productId.toString(),
+        handle: dto.productId.toString(),
+        availableForSale: dto.quantity > 0,
+        title: dto.productName,
+        description: dto.description || '',
+        descriptionHtml: dto.description || '',
+        options: options,
+        priceRange: {
+            maxVariantPrice: { amount: price, currencyCode: 'INR' },
+            minVariantPrice: { amount: price, currencyCode: 'INR' }
+        },
+        variants: variants,
         featuredImage: {
             url: getImageUrl(dto.image),
             altText: dto.productName,
@@ -182,8 +212,11 @@ function mapProductToShopify(dto: ProductDTO): Product {
             title: dto.productName,
             description: dto.description || ''
         },
-        tags: [],
+        tags: dto.tags || [],
         updatedAt: new Date().toISOString(),
+        materialStory: dto.materialStory,
+        stylistNotes: dto.stylistNotes,
+        modelMeasurements: dto.modelMeasurements,
         reviews: dto.reviews || [],
         rating: dto.reviews?.length
             ? dto.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / dto.reviews.length
@@ -219,7 +252,8 @@ function mapCartToShopify(dto: CartDTO): Cart {
                         altText: item.productName,
                         width: 100,
                         height: 100
-                    }
+                    },
+                    totalQuantity: item.quantity
                 }
             }
         };
@@ -245,35 +279,41 @@ export async function getProducts({
     reverse,
     sortKey,
     minPrice,
-    maxPrice
+    maxPrice,
+    color,
+    size,
+    material
 }: {
     query?: string;
     reverse?: boolean;
     sortKey?: string;
     minPrice?: number;
     maxPrice?: number;
+    color?: string;
+    size?: string;
+    material?: string;
 }): Promise<Product[]> {
     try {
         let endpoint = '/public/products';
-        if (query || minPrice !== undefined || maxPrice !== undefined) {
+        if (query || minPrice !== undefined || maxPrice !== undefined || color || size || material) {
             const params = new URLSearchParams();
             if (query) params.append('keyword', query);
             if (minPrice !== undefined) params.append('minPrice', minPrice.toString());
             if (maxPrice !== undefined) params.append('maxPrice', maxPrice.toString());
+            if (color) params.append('color', color);
+            if (size) params.append('size', size);
+            if (material) params.append('material', material);
 
-            // Backend search by keyword is usually /public/products/keyword/{keyword}
-            // or a more generic faceted search if available.
-            // Based on ProductController, we have /public/products/keyword/{keyword}
-            endpoint = query
-                ? `/public/products/keyword/${encodeURIComponent(query)}?${params.toString()}`
-                : `/public/products?${params.toString()}`;
+            // Use the faceted search endpoint if any filters or query are present
+            endpoint = `/public/products/search?${params.toString()}`;
         }
-
-        const dtos = await backendFetch<any>(endpoint).then(res => res.data?.content || res.content || res.data || res);
+        
+        const res = await backendFetch<any>(endpoint);
+        const dtos = res.data?.content || res.content || res.data || res;
         return Array.isArray(dtos) ? dtos.map(mapProductToShopify) : [];
     } catch (error) {
-        console.error('getProducts error:', error);
-        return [];
+        console.error('getProducts error (Backend connection issue):', error);
+        return []; // Remove fallback to MOCK_PRODUCTS to ensure real data requirement
     }
 }
 
@@ -411,10 +451,45 @@ export async function verifyPayment(orderId: number, paymentId: string, signatur
     });
 }
 
-export async function placeOrder(email: string, cartId: number, paymentMethod: string): Promise<any> {
+export async function updateCartAddress(cartId: number, addressId: number): Promise<CartDTO> {
+    const res = await fetch(`${API_URL}/public/carts/${cartId}/address/${addressId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': API_VERSION_HEADER
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to update cart address');
+    }
+
+    const data = await res.json();
+    return data.data;
+}
+
+export async function mergeCarts(guestCartId: number, userId: number): Promise<CartDTO> {
+    const res = await fetch(`${API_URL}/public/carts/${guestCartId}/merge/user/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': API_VERSION_HEADER
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to merge carts');
+    }
+
+    const data = await res.json();
+    return data.data;
+}
+
+export async function placeOrder(email: string, cartId: number, paymentMethod: string, request?: any): Promise<any> {
     // Backend: POST /api/v1/public/users/{emailId}/carts/{cartId}/payments/{paymentMethod}/order
     return backendFetch(`/public/users/${email}/carts/${cartId}/payments/${paymentMethod}/order`, {
-        method: 'POST'
+        method: 'POST',
+        body: request ? JSON.stringify(request) : undefined
     });
 }
 
@@ -436,6 +511,13 @@ export async function getOrderById(email: string, orderId: number): Promise<any>
     } catch (e) {
         return null;
     }
+}
+
+export async function cancelOrder(email: string, orderId: number): Promise<any> {
+    // Backend: PUT /api/v1/public/users/{emailId}/orders/{orderId}/cancel
+    return backendFetch(`/public/users/${email}/orders/${orderId}/cancel`, {
+        method: 'PUT'
+    });
 }
 
 export async function getUserProfile(): Promise<any> {
@@ -490,6 +572,51 @@ export async function updateUserProfile(userId: number, data: any): Promise<any>
     return res.data || res;
 }
 
+export async function uploadMedia(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await backendFetch<any>('/v1/media/upload', {
+        method: 'POST',
+        body: formData,
+        // FormData handles headers automatically
+    });
+    return res.data; // URL
+}
+
+export async function virtualTryOn(userPhotoUrl: string, sareeImageUrl: string): Promise<string> {
+    return backendFetch<string>('/v1/search/custom-design/virtual-try-on', {
+        method: 'POST',
+        body: JSON.stringify({ userPhotoUrl, sareeImageUrl })
+    });
+}
+
+export async function calculateOrderTotal(input: any): Promise<any> {
+    // Backend: POST /api/v1/pricing/calculate
+    const res = await backendFetch<any>('/v1/pricing/calculate', {
+        method: 'POST',
+        body: JSON.stringify(input)
+    });
+    return res.data || res;
+}
+
+export async function purchaseCustomDesign(designId: number, email: string): Promise<any> {
+    // Backend: POST /api/v1/search/custom-design/{designId}/order (Need to implement this in backend)
+    // For now we simulate it by adding a custom item to cart if endpoint is missing
+    return backendFetch(`/v1/search/custom-design/${designId}/order?email=${email}`, {
+        method: 'POST'
+    });
+}
+
+
+export async function getCustomDesigns(userId: number): Promise<any[]> {
+    try {
+        const res = await backendFetch<any>(`/v1/search/custom-design/public/user/${userId}`);
+        return res || [];
+    } catch (e) {
+        return [];
+    }
+}
 
 
 export async function login(credentials: any): Promise<any> {
@@ -531,7 +658,7 @@ export async function visualSearchByImage(imageFile: File): Promise<Product[]> {
 export async function getCollections(): Promise<Collection[]> {
     try {
         const res = await backendFetch<any>('/public/categories');
-        const categories = res.data?.content || [];
+        const categories = res.data?.content || res.content || res.data || [];
 
         return categories.map((c: any) => ({
             handle: c.categoryId.toString(),
@@ -542,17 +669,8 @@ export async function getCollections(): Promise<Collection[]> {
             path: `/search/${c.categoryId}`
         }));
     } catch (error) {
-        console.error('getCollections error:', error);
-        return [
-            {
-                handle: 'all',
-                title: 'All Products',
-                description: 'Everything',
-                seo: { title: 'All', description: 'All' },
-                updatedAt: new Date().toISOString(),
-                path: '/search'
-            }
-        ];
+        console.error('getCollections error (Backend connection issue):', error);
+        return []; // Remove fallback to MOCK_COLLECTIONS
     }
 }
 
@@ -645,8 +763,8 @@ export async function getCollectionProducts({ collection, sortKey, reverse }: { 
         const products = res.data?.content || res.content || [];
         return products.map(mapProductToShopify);
     } catch (e) {
-        console.error('getCollectionProducts error:', e);
-        return [];
+        console.error('getCollectionProducts error (Backend connection issue):', e);
+        return []; // Remove fallback to MOCK_PRODUCTS
     }
 }
 
@@ -834,17 +952,19 @@ export async function getTenantConfig() {
         const data = res.data || res;
 
         return {
-            name: data.name || 'Vaabhi Storefront',
+            name: data.name || 'VAABHI',
             logoUrl: data.logoUrl || '/logo.png',
             accentColor: data.accentColor || '#2563eb',
             supportEmail: data.supportEmail || 'support@vaabhi.com',
+            heroVideoUrl: data.heroVideoUrl,
+            heroPosterUrl: data.heroPosterUrl,
             socialLinks: data.socialLinks || { instagram: '', facebook: '' },
             footerMenu: data.footerMenu
         };
     } catch (e) {
         console.error('getTenantConfig error:', e);
         return {
-            name: 'Vaabhi Storefront',
+            name: 'VAABHI',
             logoUrl: '/logo.png',
             accentColor: '#2563eb',
             supportEmail: 'support@vaabhi.com',
@@ -898,5 +1018,26 @@ export async function getTicket(ticketId: number): Promise<any> {
         return res.data || res;
     } catch (error) {
         return null;
+    }
+}
+
+export async function getExchangeRates(): Promise<Record<string, number>> {
+     try {
+        // Backend: GET /api/v1/public/currency/rates
+        const res = await backendFetch<any>('/public/currency/rates');
+        return res.data || res || {
+            INR: 1,
+            USD: 0.012,
+            GBP: 0.0095,
+            AED: 0.044
+        };
+    } catch (e) {
+        // Fallback if backend is not ready
+        return {
+            INR: 1,
+            USD: 0.012,
+            GBP: 0.0095,
+            AED: 0.044
+        };
     }
 }

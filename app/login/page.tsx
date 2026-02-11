@@ -19,72 +19,107 @@ export default function LoginPage() {
         setLoading(true);
         try {
             const res = await loginUser({ email, password });
-            login(res['jwt-token'], res['refresh-token'], { email });
-            toast.success('Welcome back!');
+            login(res['jwt-token'], res['refresh-token'], res.user);
+            toast.success('Welcome back to Vaabhi!');
             router.push('/account');
         } catch (err: any) {
-            toast.error(err.message || 'Login failed');
+            toast.error(err.message || 'Authentication failed. Please check your credentials.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center px-4 py-12">
-            <div className="w-full max-w-md space-y-8 rounded-2xl border border-neutral-200 bg-white/80 p-10 shadow-xl backdrop-blur-xl dark:border-neutral-800 dark:bg-black/80">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight">Welcome Back</h2>
-                    <p className="mt-2 text-sm text-neutral-500">Sign in to your Vaabhi account</p>
-                </div>
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+            {/* Animated Background Orbs */}
+            <div className="absolute -top-[10%] -left-[10%] h-[40%] w-[40%] rounded-full bg-blue-100/50 blur-[120px] dark:bg-blue-900/20" />
+            <div className="absolute -bottom-[10%] -right-[10%] h-[40%] w-[40%] rounded-full bg-purple-100/50 blur-[120px] dark:bg-purple-900/20" />
 
-                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-500">Email address</label>
-                            <input
-                                required
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="mt-1 w-full rounded-md border border-neutral-200 bg-transparent p-3 text-sm focus:border-black focus:ring-0 dark:border-neutral-800 dark:focus:border-white"
-                            />
-                        </div>
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <label className="block text-sm font-medium text-neutral-500">Password</label>
-                                <Link
-                                    href="/forgot-password"
-                                    className="text-xs text-neutral-400 hover:text-black hover:underline dark:hover:text-white"
-                                >
-                                    Forgot password?
-                                </Link>
+            <div className="relative w-full max-w-md">
+                <div className="space-y-8 rounded-[2.5rem] border border-white/20 bg-white/40 p-12 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] backdrop-blur-3xl dark:border-white/10 dark:bg-neutral-950/40">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-black tracking-tight text-black dark:text-white uppercase transition-all">
+                            Vaabhi
+                        </h1>
+                        <p className="mt-3 text-sm font-medium tracking-wide text-neutral-500 uppercase">
+                            The Luxury Portfolio
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+                        <div className="space-y-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 ml-1">
+                                    Email Address
+                                </label>
+                                <input
+                                    required
+                                    type="email"
+                                    placeholder="email@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full rounded-2xl border border-neutral-200 bg-white/50 p-4 text-sm outline-none transition-all focus:border-black focus:ring-4 focus:ring-black/5 dark:border-neutral-800 dark:bg-black/50 dark:focus:border-white dark:focus:ring-white/5"
+                                />
                             </div>
-                            <input
-                                required
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1 w-full rounded-md border border-neutral-200 bg-transparent p-3 text-sm focus:border-black focus:ring-0 dark:border-neutral-800 dark:focus:border-white"
-                            />
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+                                        Password
+                                    </label>
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+                                    >
+                                        Forgot?
+                                    </Link>
+                                </div>
+                                <input
+                                    required
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full rounded-2xl border border-neutral-200 bg-white/50 p-4 text-sm outline-none transition-all focus:border-black focus:ring-4 focus:ring-black/5 dark:border-neutral-800 dark:bg-black/50 dark:focus:border-white dark:focus:ring-white/5"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-black py-4 text-xs font-black uppercase tracking-[0.3em] text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 dark:bg-white dark:text-black"
+                        >
+                            <span className="relative z-10">{loading ? 'Verifying...' : 'Sign In'}</span>
+                            <div className="absolute inset-0 translate-y-full bg-neutral-800 transition-transform group-hover:translate-y-0 dark:bg-neutral-200" />
+                        </button>
+                    </form>
+
+                    <div className="relative py-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
+                        </div>
+                        <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+                            <span className="bg-transparent px-2 text-neutral-400">Or continue with</span>
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="flex w-full justify-center rounded-full bg-black py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 dark:bg-white dark:text-black"
-                    >
-                        {loading ? 'Signing in...' : 'Sign In'}
-                    </button>
-                </form>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button className="flex items-center justify-center rounded-2xl border border-neutral-200 bg-white p-3 text-xs font-bold transition-all hover:bg-neutral-50 dark:border-neutral-800 dark:bg-black dark:hover:bg-neutral-900">
+                            Google
+                        </button>
+                        <button className="flex items-center justify-center rounded-2xl border border-neutral-200 bg-white p-3 text-xs font-bold transition-all hover:bg-neutral-50 dark:border-neutral-800 dark:bg-black dark:hover:bg-neutral-900">
+                            Apple
+                        </button>
+                    </div>
 
-                <div className="text-center text-sm">
-                    <p className="text-neutral-500">
-                        Don't have an account?{' '}
-                        <Link href="/register" className="font-bold text-black hover:underline dark:text-white">
-                            Create one
-                        </Link>
-                    </p>
+                    <div className="pt-4 text-center">
+                        <p className="text-xs font-medium text-neutral-500">
+                            New to Vaabhi?{' '}
+                            <Link href="/register" className="font-black uppercase tracking-widest text-black hover:underline dark:text-white">
+                                Register
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

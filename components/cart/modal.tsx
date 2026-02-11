@@ -9,8 +9,9 @@ import { DEFAULT_OPTION } from 'lib/constants';
 import { createUrl } from 'lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { toast } from 'sonner';
 import { applyCouponCode, createCartAndSetCookie, redirectToCheckout } from './actions';
 import { useCart } from './cart-context';
 import { DeleteItemButton } from './delete-item-button';
@@ -18,9 +19,19 @@ import { EditItemQuantityButton } from './edit-item-quantity-button';
 import OpenCart from './open-cart';
 
 function CouponCode() {
+  const [state, formAction] = useActionState(applyCouponCode, null);
   const { pending } = useFormStatus();
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (state === 'Coupon applied') {
+      toast.success('Coupon applied successfully!');
+      if (inputRef.current) inputRef.current.value = '';
+    } else if (state && state !== 'Coupon applied') {
+      toast.error(state);
+    }
+  }, [state]);
 
   useEffect(() => {
     fetch('/api/coupons')
@@ -36,36 +47,36 @@ function CouponCode() {
   };
 
   return (
-    <div className="space-y-4">
-      <form action={applyCouponCode} className="flex gap-2">
+    <div className="space-y-4 pt-4">
+      <form action={formAction} className="relative">
         <input
           ref={inputRef}
           type="text"
           name="code"
-          placeholder="Coupon Code"
-          className="w-full rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm text-black placeholder:text-neutral-500 dark:border-neutral-700 dark:bg-black dark:text-white dark:placeholder:text-neutral-400"
+          placeholder="ENTER COUPON CODE"
+          className="w-full border-b border-neutral-300 bg-transparent py-2 pr-16 text-xs font-bold uppercase tracking-widest text-black placeholder:text-neutral-400 focus:border-black focus:outline-none dark:border-neutral-700 dark:text-white dark:focus:border-white"
         />
         <button
           type="submit"
           disabled={pending}
-          className="flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="absolute right-0 top-0 h-full text-xs font-black uppercase tracking-widest text-heritage-red hover:text-heritage-gold disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? <LoadingDots className="bg-white" /> : 'Apply'}
+          {pending ? <LoadingDots className="bg-heritage-red" /> : 'Apply'}
         </button>
       </form>
 
       {availableCoupons.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Available Offers</p>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {availableCoupons.map((coupon) => (
               <button
                 key={coupon.couponId}
                 onClick={() => selectCoupon(coupon.couponCode)}
-                className="flex flex-none flex-col items-start rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-2 text-left transition-colors hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-900/10 dark:hover:bg-blue-900/20"
+                className="flex flex-none flex-col items-start border border-neutral-200 bg-neutral-50 p-3 text-left transition-colors hover:border-black dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-white w-40"
               >
-                <span className="text-xs font-bold text-blue-600">{coupon.couponCode}</span>
-                <span className="text-[10px] text-blue-500">
+                <span className="text-xs font-bold uppercase tracking-widest text-black dark:text-white mb-1">{coupon.couponCode}</span>
+                <span className="text-[10px] text-neutral-500">
                   {coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}% Off` : `₹${coupon.discountValue} Off`}
                 </span>
               </button>
@@ -134,171 +145,160 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-200 bg-white/80 p-6 text-black backdrop-blur-xl md:w-[390px] dark:border-neutral-700 dark:bg-black/80 dark:text-white">
-              <div className="flex items-center justify-between">
-                <p className="text-lg font-semibold">My Cart</p>
-                <button aria-label="Close cart" onClick={closeCart}>
-                  <CloseCart />
-                </button>
-              </div>
-
-              {!cart || cart.lines.length === 0 ? (
-                <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
-                  <ShoppingCartIcon className="h-16" />
-                  <p className="mt-6 text-center text-2xl font-bold">
-                    Your cart is empty.
-                  </p>
+            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-100 bg-white p-6 text-black shadow-2xl md:w-[450px] dark:border-neutral-800 dark:bg-black dark:text-white">
+                <div className="flex items-center justify-between mb-10 pb-6 border-b border-heritage-gold/20">
+                  <p className="text-3xl font-black uppercase tracking-tighter text-heritage-red">Maison Bag</p>
+                  <button aria-label="Close cart" onClick={closeCart}>
+                    <CloseCart />
+                  </button>
                 </div>
-              ) : (
-                <div className="flex h-full flex-col justify-between overflow-hidden p-1">
-                  <ul className="grow overflow-auto py-4">
-                    {cart.lines
-                      .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                          b.merchandise.product.title
+
+                {!cart || cart.lines.length === 0 ? (
+                  <div className="mt-32 flex w-full flex-col items-center justify-center">
+                    <div className="h-24 w-24 rounded-full bg-heritage-cream flex items-center justify-center mb-8">
+                       <ShoppingCartIcon className="h-10 w-10 text-heritage-red/40" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-heritage-black/40">
+                      Your bag is currently void.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex h-full flex-col justify-between overflow-hidden">
+                    <ul className="grow overflow-auto py-4 custom-scrollbar">
+                      {cart.lines
+                        .sort((a, b) =>
+                          a.merchandise.product.title.localeCompare(
+                            b.merchandise.product.title
+                          )
                         )
-                      )
-                      .map((item, i) => {
-                        const merchandiseSearchParams =
-                          {} as MerchandiseSearchParams;
+                        .map((item, i) => {
+                          const merchandiseSearchParams =
+                            {} as MerchandiseSearchParams;
 
-                        item.merchandise.selectedOptions.forEach(
-                          ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                              merchandiseSearchParams[name.toLowerCase()] =
-                                value;
+                          item.merchandise.selectedOptions.forEach(
+                            ({ name, value }) => {
+                              if (value !== DEFAULT_OPTION) {
+                                merchandiseSearchParams[name.toLowerCase()] =
+                                  value;
+                              }
                             }
-                          }
-                        );
+                          );
 
-                        const merchandiseUrl = createUrl(
-                          `/product/${item.merchandise.product.handle}`,
-                          new URLSearchParams(merchandiseSearchParams)
-                        );
+                          const merchandiseUrl = createUrl(
+                            `/product/${item.merchandise.product.handle}`,
+                            new URLSearchParams(merchandiseSearchParams)
+                          );
 
-                        return (
-                          <li
-                            key={i}
-                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                          >
-                            <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                              <div className="absolute z-40 -ml-1 -mt-2">
-                                <DeleteItemButton
-                                  item={item}
-                                  optimisticUpdate={updateCartItem}
-                                />
-                              </div>
-                              <div className="flex flex-row">
-                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                  <Image
-                                    className="h-full w-full object-cover"
-                                    width={64}
-                                    height={64}
-                                    alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
-                                    }
-                                    src={
-                                      item.merchandise.product.featuredImage.url
-                                    }
+                          return (
+                            <li
+                              key={i}
+                              className="flex w-full flex-col border-b border-heritage-gold/10 last:border-0"
+                            >
+                              <div className="relative flex w-full flex-row justify-between py-8">
+                                <div className="absolute z-40 -ml-2 -mt-2">
+                                  <DeleteItemButton
+                                    item={item}
+                                    optimisticUpdate={updateCartItem}
                                   />
                                 </div>
-                                <Link
-                                  href={merchandiseUrl}
-                                  onClick={closeCart}
-                                  className="z-30 ml-2 flex flex-row space-x-4"
-                                >
-                                  <div className="flex flex-1 flex-col text-base">
-                                    <span className="leading-tight">
+                                <div className="flex flex-row gap-6">
+                                  <div className="relative h-24 w-20 overflow-hidden rounded-xl bg-heritage-cream border border-heritage-gold/10">
+                                    <Image
+                                      className="h-full w-full object-cover transition-transform hover:scale-110"
+                                      width={80}
+                                      height={96}
+                                      alt={
+                                        item.merchandise.product.featuredImage
+                                          .altText ||
+                                        item.merchandise.product.title
+                                      }
+                                      src={
+                                        item.merchandise.product.featuredImage.url
+                                      }
+                                    />
+                                  </div>
+                                  <Link
+                                    href={merchandiseUrl}
+                                    onClick={closeCart}
+                                    className="z-30 flex flex-col pt-1"
+                                  >
+                                    <span className="text-sm font-black uppercase tracking-widest text-heritage-black leading-tight group-hover:text-heritage-red">
                                       {item.merchandise.product.title}
                                     </span>
                                     {item.merchandise.title !==
                                       DEFAULT_OPTION ? (
-                                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
+                                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-heritage-black/40">
+                                        Edition: {item.merchandise.title}
                                       </p>
                                     ) : null}
-                                  </div>
-                                </Link>
-                              </div>
-                              <div className="flex h-16 flex-col justify-between">
-                                <Price
-                                  className="flex justify-end space-y-2 text-right text-sm"
-                                  amount={item.cost.totalAmount.amount}
-                                  currencyCode={
-                                    item.cost.totalAmount.currencyCode
-                                  }
-                                />
-                                <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-                                  <EditItemQuantityButton
-                                    item={item}
-                                    type="minus"
-                                    optimisticUpdate={updateCartItem}
+                                  </Link>
+                                </div>
+                                <div className="flex flex-col justify-between items-end">
+                                  <Price
+                                    className="text-xs font-black text-heritage-red"
+                                    amount={item.cost.totalAmount.amount}
+                                    currencyCode={
+                                      item.cost.totalAmount.currencyCode
+                                    }
                                   />
-                                  <p className="w-6 text-center">
-                                    <span className="w-full text-sm">
+                                  <div className="flex h-10 flex-row items-center rounded-2xl border-2 border-heritage-gold/10 overflow-hidden bg-heritage-cream/20">
+                                    <EditItemQuantityButton
+                                      item={item}
+                                      type="minus"
+                                      optimisticUpdate={updateCartItem}
+                                    />
+                                    <p className="w-8 text-center text-[11px] font-black text-heritage-black">
                                       {item.quantity}
-                                    </span>
-                                  </p>
-                                  <EditItemQuantityButton
-                                    item={item}
-                                    type="plus"
-                                    optimisticUpdate={updateCartItem}
-                                  />
+                                    </p>
+                                    <EditItemQuantityButton
+                                      item={item}
+                                      type="plus"
+                                      optimisticUpdate={updateCartItem}
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                  </ul>
-                  <div className="py-4 text-xs text-neutral-500 dark:text-neutral-400">
-                    <div className="mb-2 flex items-center justify-between">
-                      <p>Subtotal</p>
-                      <Price
-                        className="text-right text-black dark:text-white"
-                        amount={cart.cost.subtotalAmount.amount}
-                        currencyCode={cart.cost.subtotalAmount.currencyCode}
-                      />
-                    </div>
-                    <div className="mb-1 flex items-center justify-between">
-                      <p>CGST (6%)</p>
-                      <Price
-                        className="text-right"
-                        amount={(Number(cart.cost.totalTaxAmount.amount) / 2).toFixed(2)}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                      />
-                    </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                      <p>SGST (6%)</p>
-                      <Price
-                        className="text-right"
-                        amount={(Number(cart.cost.totalTaxAmount.amount) / 2).toFixed(2)}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                      />
-                    </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Shipping</p>
-                      <p className="text-right">Calculated at checkout</p>
-                    </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Total</p>
-                      <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
+                            </li>
+                          );
+                        })}
+                    </ul>
+                    <div className="pt-8 space-y-4 border-t-2 border-heritage-gold/20">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest text-heritage-black/40">
+                          <p>Dossier Subtotal</p>
+                          <Price
+                            className="text-heritage-black"
+                            amount={cart.cost.subtotalAmount.amount}
+                            currencyCode={cart.cost.subtotalAmount.currencyCode}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] uppercase font-black tracking-widest text-heritage-black/40">
+                          <p>Complimentary Transit</p>
+                          <p className="text-heritage-red">Pre-Authorized</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-4">
+                          <p className="text-xs font-black uppercase tracking-[0.2em] text-heritage-black">Total Procurement</p>
+                          <Price
+                            className="text-2xl font-black tracking-tighter text-heritage-red"
+                            amount={cart.cost.totalAmount.amount}
+                            currencyCode={cart.cost.totalAmount.currencyCode}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="py-4">
+                         <CouponCode />
+                      </div>
+
+                      <form action={redirectToCheckout}>
+                        <CheckoutButton />
+                      </form>
+                      <p className="text-center text-[8px] font-black uppercase tracking-[0.4em] text-heritage-black/30 pb-4">
+                        Handcrafted with Passion • Secured by Heritage
+                      </p>
                     </div>
                   </div>
-                  <div className="mb-3 border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                    <CouponCode />
-                  </div>
-                  <form action={redirectToCheckout}>
-                    <CheckoutButton />
-                  </form>
-                </div>
-              )}
+                )}
             </Dialog.Panel>
           </Transition.Child>
         </Dialog>
@@ -309,10 +309,10 @@ export default function CartModal() {
 
 function CloseCart({ className }: { className?: string }) {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white">
+    <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-heritage-gold/20 text-heritage-black transition-all hover:bg-heritage-red hover:text-white group">
       <XMarkIcon
         className={clsx(
-          'h-6 transition-all ease-in-out hover:scale-110',
+          'h-5 transition-transform group-hover:rotate-90',
           className
         )}
       />
@@ -325,11 +325,11 @@ function CheckoutButton() {
 
   return (
     <button
-      className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+      className="block w-full rounded-2xl bg-heritage-red py-6 text-[10px] font-black uppercase tracking-[0.4em] text-white transition-all hover:bg-heritage-gold hover:text-heritage-black disabled:opacity-50 shadow-[0_10px_30px_rgba(139,0,0,0.3)] active:scale-95"
       type="submit"
       disabled={pending}
     >
-      {pending ? <LoadingDots className="bg-white" /> : 'Proceed to Checkout'}
+      {pending ? <LoadingDots className="bg-white" /> : 'Authorize Procurement'}
     </button>
   );
 }

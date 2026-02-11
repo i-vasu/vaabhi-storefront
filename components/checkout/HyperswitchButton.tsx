@@ -69,10 +69,10 @@ export default function HyperswitchButton({
         <div id="payment-element-container">
             <button
                 onClick={handlePayment}
-                className="mt-6 w-full rounded-full bg-slate-900 px-3 py-4 text-center text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
+                className="mt-6 w-full rounded-[2rem] bg-heritage-black py-6 text-[10px] font-black uppercase tracking-[0.4em] text-white transition-all hover:bg-heritage-red shadow-xl disabled:opacity-50 active:scale-95 border-2 border-heritage-gold/20"
                 disabled={loading}
             >
-                {loading ? 'Opening Secure Vault...' : `Pay ₹${amount} with Hyperswitch`}
+                {loading ? 'OPENING SECURE VAULT...' : `SETTLE ₹${amount} VIA HYPERSWITCH`}
             </button>
             <div id="payment-element" className="mt-4"></div>
         </div>

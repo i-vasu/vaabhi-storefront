@@ -1,5 +1,6 @@
 'use client';
 
+import { getBackendCookie, mergeCarts, setBackendCookie } from 'lib/backend';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
@@ -37,6 +38,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setToken(token);
         setUser(userData);
+
+        // Trigger Cart Merge if guest cart exists
+        getBackendCookie('cartId').then(guestCartId => {
+            if (guestCartId && userData.userId) {
+                mergeCarts(Number(guestCartId), userData.userId)
+                    .then(mergedCart => {
+                        console.log('Cart merged successfully:', mergedCart);
+                        // Update cartId cookie to the new merged cart ID if it changed
+                        if (mergedCart.cartId.toString() !== guestCartId) {
+                            setBackendCookie('cartId', mergedCart.cartId.toString());
+                        }
+                    })
+                    .catch(err => console.error('Cart merge failed:', err));
+            }
+        });
     };
 
     const logout = () => {

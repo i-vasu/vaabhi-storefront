@@ -1,156 +1,130 @@
+'use client';
+
 import { GridTileImage } from 'components/grid/tile';
+import { motion } from 'framer-motion';
 import { getOrderHistory, getRecentlyViewed, getRewardPoints, getUserProfile, getWalletDetails } from 'lib/backend';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export const metadata = {
-    title: 'Account | Vaabhi Storefront',
-    description: 'Manage your profile, orders, and rewards.'
-};
+export default function AccountPage() {
+    const [data, setData] = useState<any>(null);
 
-export default async function AccountPage() {
-    const cookieStore = await cookies();
-    const userCookie = cookieStore.get('vaabhi_user')?.value;
-    const user = userCookie ? JSON.parse(userCookie) : null;
-    const email = user?.email || 'customer@example.com';
-    const userId = user?.userId || user?.id || 1;
+    useEffect(() => {
+        async function fetchData() {
+            const profile = await getUserProfile();
+            const orders = await getOrderHistory(profile?.email || 'customer@example.com');
+            const wallet = await getWalletDetails();
+            const rewards = await getRewardPoints();
+            const recentlyViewed = await getRecentlyViewed(profile?.userId || 1, 4);
+            setData({ profile, orders, wallet, rewards, recentlyViewed });
+        }
+        fetchData();
+    }, []);
 
-    const profile = await getUserProfile();
-    const orders = await getOrderHistory(email);
+    if (!data) return <div className="p-10 text-center">Loading your style hub...</div>;
 
-    // Feature Parity: Wallet and Rewards
-    const wallet = await getWalletDetails();
-    const rewards = await getRewardPoints();
-    const recentlyViewed = await getRecentlyViewed(userId, 4);
+    const { profile, orders, wallet, rewards, recentlyViewed } = data;
     return (
-        <div className="space-y-10">
-            <section>
-                <h1 className="text-3xl font-bold tracking-tight">Bonjour, {profile?.firstName || 'Fashionista'}!</h1>
-                <p className="mt-2 text-neutral-500">Your style hub. Manage orders, wallet, and rewards in one premium space.</p>
+        <div className="space-y-12">
+            <section className="relative px-6 py-12 bg-heritage-red rounded-[3rem] text-white shadow-2xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-heritage-gold/20 rounded-full -mr-32 -mt-32 blur-3xl" />
+                <div className="relative z-10">
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Salutations, {profile?.firstName || 'Sovereign'}</h1>
+                    <p className="mt-4 text-[10px] font-black uppercase tracking-[0.4em] text-heritage-gold-light">The VAABHI Digital Archive & Privilege Dashboard</p>
+                </div>
             </section>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* Offers Card */}
-                <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-white to-amber-50/30 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:to-amber-900/10">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Your Offers</h3>
-                    <p className="text-3xl font-bold text-amber-600">Rewards</p>
-                    <div className="mt-4">
-                        <Link href="/account/offers" className="text-sm font-medium hover:underline">
-                            View Coupons →
-                        </Link>
-                    </div>
-                </div>
-                {/* Wallet Balance Card */}
-                <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-white to-neutral-50 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:to-black">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Wallet Balance</h3>
-                    <p className="text-3xl font-bold text-blue-600">₹{wallet.balance.toFixed(2)}</p>
-                    <div className="mt-4">
-                        <Link href="/account/wallet" className="text-sm font-medium hover:underline">
-                            View Transactions →
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Reward Points Card */}
-                <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-white to-neutral-50 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:to-black">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Reward Points</h3>
-                    <p className="text-3xl font-bold text-amber-500">{rewards.rewardPoints}</p>
-                    <div className="mt-2">
-                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 px-2">
+                {/* Rewards Card */}
+                <Link href="/account/rewards" className="group rounded-[2.5rem] border-2 border-heritage-gold/20 bg-white p-8 shadow-lg transition-all hover:border-heritage-red hover:shadow-2xl">
+                    <h3 className="mb-4 text-[10px] font-black uppercase tracking-widest text-heritage-red">Privilege Balance</h3>
+                    <p className="text-4xl font-black text-heritage-black group-hover:text-heritage-red transition-colors">{rewards.rewardPoints}</p>
+                    <div className="mt-6 flex items-center justify-between">
+                        <span className="rounded-full bg-heritage-gold/10 px-4 py-1 text-[9px] font-bold text-heritage-gold uppercase tracking-widest border border-heritage-gold/20">
                             {rewards.customerGroup} Tier
                         </span>
+                        <span className="text-[10px] font-black text-heritage-red opacity-0 group-hover:opacity-100 transition-opacity">Review →</span>
                     </div>
-                </div>
+                </Link>
 
-                {/* Recent Order Card */}
-                <div className="rounded-xl border border-neutral-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                    <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-neutral-400">Recent Order</h3>
+                {/* Wallet Card */}
+                <Link href="/account/wallet" className="group rounded-[2.5rem] border-2 border-heritage-gold/20 bg-white p-8 shadow-lg transition-all hover:border-heritage-red hover:shadow-2xl">
+                    <h3 className="mb-4 text-[10px] font-black uppercase tracking-widest text-heritage-red">Available Liquidity</h3>
+                    <p className="text-4xl font-black text-heritage-black group-hover:text-heritage-red transition-colors">₹{wallet.balance.toFixed(0)}</p>
+                    <div className="mt-6 flex items-center justify-between">
+                        <span className="rounded-full bg-heritage-red/5 px-4 py-1 text-[9px] font-bold text-heritage-red uppercase tracking-widest border border-heritage-red/10">
+                            Secured
+                        </span>
+                        <span className="text-[10px] font-black text-heritage-red opacity-0 group-hover:opacity-100 transition-opacity">Ledger →</span>
+                    </div>
+                </Link>
+
+                {/* Recent Order */}
+                <div className="rounded-[2.5rem] border-2 border-heritage-gold/20 bg-white p-8 shadow-lg">
+                    <h3 className="mb-4 text-[10px] font-black uppercase tracking-widest text-heritage-red">Latest Procurement</h3>
                     {orders.length > 0 ? (
                         <div>
-                            <p className="text-lg font-medium">#{orders[0].orderId}</p>
-                            <p className="text-xs text-neutral-500">{new Date(orders[0].orderDate).toLocaleDateString()}</p>
-                            <div className="mt-4">
-                                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-bold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                            <p className="text-xl font-black text-heritage-black tracking-tighter">ORD-{orders[0].orderId}</p>
+                            <p className="text-[10px] font-bold text-heritage-black/40 uppercase tracking-widest mt-1">{new Date(orders[0].orderDate).toLocaleDateString()}</p>
+                            <div className="mt-6">
+                                <span className="inline-block rounded-full bg-heritage-black px-4 py-1 text-[9px] font-black uppercase tracking-widest text-heritage-gold">
                                     {orders[0].orderStatus}
                                 </span>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm text-neutral-500">No recent orders.</p>
+                        <p className="text-xs font-medium italic text-heritage-black/40">The archives are empty.</p>
                     )}
                 </div>
 
-                {/* Profile Card */}
-                <div className="rounded-xl border border-neutral-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Personal Details</h3>
-                    <p className="truncate font-medium">{profile?.email || email}</p>
-                    <div className="mt-4">
-                        <Link href="/account/profile" className="text-sm font-medium text-blue-600 hover:underline">
-                            Update Profile
-                        </Link>
+                {/* Concierge/Support */}
+                <Link href="/account/support" className="group rounded-[2.5rem] border-2 border-heritage-gold/20 bg-heritage-black p-8 shadow-lg transition-all hover:bg-heritage-red">
+                    <h3 className="mb-4 text-[10px] font-black uppercase tracking-widest text-heritage-gold">Elite Support</h3>
+                    <p className="text-2xl font-black text-white group-hover:text-white transition-colors uppercase tracking-tight">Concierge</p>
+                    <div className="mt-8">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-heritage-gold/60 group-hover:text-white">Request Assistance →</span>
                     </div>
-                </div>
-
-                {/* Social Card */}
-                <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-white to-blue-50/30 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:to-blue-900/10">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Friends & Social</h3>
-                    <p className="text-3xl font-bold text-indigo-600">Connect</p>
-                    <div className="mt-4">
-                        <Link href="/account/friends" className="text-sm font-medium hover:underline">
-                            Manage Friends →
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Support Card */}
-                <div className="rounded-xl border border-neutral-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Help & Support</h3>
-                    <p className="text-3xl font-bold text-neutral-800 dark:text-neutral-200">Concierge</p>
-                    <div className="mt-4">
-                        <Link href="/account/support" className="text-sm font-medium text-blue-600 hover:underline">
-                            Contact Support →
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Wishlist Card */}
-                <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-white to-pink-50/30 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:to-pink-900/10">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">Save for Later</h3>
-                    <p className="text-3xl font-bold text-pink-600">Wishlist</p>
-                    <div className="mt-4">
-                        <Link href="/account/wishlist" className="text-sm font-medium hover:underline text-pink-700 dark:text-pink-400">
-                            View Saved Items →
-                        </Link>
-                    </div>
-                </div>
+                </Link>
             </div>
 
-            {/* Addresses Link */}
-            <div className="flex justify-center">
-                <Link href="/account/addresses" className="text-sm font-black uppercase tracking-widest text-neutral-400 hover:text-black hover:underline">
-                    Manage Saved Addresses
-                </Link>
+            {/* Quick Actions Grid */}
+            <div className="flex flex-wrap justify-center gap-4 py-6 border-y-2 border-heritage-gold/10">
+                {[
+                    { label: "Dossier Details", href: "/account/profile" },
+                    { label: "Secured Addresses", href: "/account/addresses" },
+                    { label: "Archived Favorites", href: "/account/wishlist" },
+                    { label: "Loyalty Ledger", href: "/account/rewards" }
+                ].map((action, i) => (
+                    <Link key={i} href={action.href} className="text-[10px] font-black uppercase tracking-[0.2em] text-heritage-red hover:text-heritage-gold px-4 py-2 transition-colors">
+                        {action.label}
+                    </Link>
+                ))}
             </div>
 
             {/* Recently Viewed */}
             {recentlyViewed.length > 0 && (
-                <section>
-                    <h2 className="mb-6 text-xl font-bold">Picked for You (Recently Viewed)</h2>
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        {recentlyViewed.map((product) => (
+                <section className="pt-8">
+                    <div className="flex items-center gap-6 mb-8">
+                        <h2 className="text-2xl font-black uppercase tracking-tighter text-heritage-black">Curated Archives</h2>
+                        <div className="flex-1 h-px bg-heritage-gold/20" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+                        {recentlyViewed.map((product: any) => (
                             <Link
                                 key={product.id}
                                 href={`/product/${product.handle}`}
-                                className="group relative aspect-square overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800"
+                                className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-heritage-gold/10 bg-white"
                             >
                                 <GridTileImage
                                     alt={product.title}
                                     src={product.featuredImage?.url}
                                     fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     sizes="(min-width: 1024px) 15vw, (min-width: 768px) 25vw, 50vw"
                                 />
-                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <p className="truncate text-xs font-bold text-white">{product.title}</p>
+                                <div className="absolute inset-0 bg-gradient-to-t from-heritage-black/80 via-transparent to-transparent p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-heritage-gold truncate">{product.title}</p>
+                                    <p className="text-xs font-black text-white mt-1">View Piece</p>
                                 </div>
                             </Link>
                         ))}
@@ -158,16 +132,40 @@ export default async function AccountPage() {
                 </section>
             )}
 
-            {/* Loyalty Perks Section */}
-            <section className="rounded-2xl bg-neutral-900 p-8 text-white">
-                <div className="md:flex md:items-center md:justify-between">
-                    <div>
-                        <h2 className="text-2xl font-bold">Vaabhi Elite Rewards</h2>
-                        <p className="mt-2 text-neutral-400">You're just 500 points away from unlocking the <strong>Platinum</strong> tier!</p>
+            {/* Tier Progress Section */}
+            <section className="relative overflow-hidden rounded-[3rem] bg-heritage-black/5 p-12 border-2 border-heritage-gold/10">
+                <div className="relative z-10 md:flex md:items-center md:justify-between gap-12">
+                    <div className="flex-1">
+                        <div className="mb-6 flex items-center gap-3">
+                            <span className="inline-flex items-center rounded-full bg-heritage-red px-4 py-1 text-[9px] font-black uppercase tracking-widest text-white">
+                                {rewards.customerGroup} Sovereign
+                            </span>
+                        </div>
+                        <h2 className="text-4xl font-black uppercase tracking-tighter text-heritage-black">The VAABHI Legacy</h2>
+                        <div className="mt-10 max-w-lg">
+                            <div className="mb-3 flex justify-between text-[10px] font-black uppercase tracking-widest text-heritage-red">
+                                <span>Ascending to Platinum</span>
+                                <span className="text-heritage-gold">75% Complete</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-heritage-gold/10">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '75%' }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    className="h-full bg-heritage-red"
+                                />
+                            </div>
+                            <p className="mt-6 text-xs font-medium leading-relaxed text-heritage-black/60 italic uppercase tracking-wide">
+                                Acquire <span className="font-black text-heritage-red">500 more points</span> to unlock the <span className="text-heritage-gold font-black">Platinum Concierge</span> archives.
+                            </p>
+                        </div>
                     </div>
-                    <div className="mt-6 md:mt-0">
-                        <Link href="/account/rewards" className="rounded-full bg-white px-6 py-2 text-sm font-bold text-black hover:bg-neutral-200">
-                            Explore Perks
+                    <div className="mt-10 md:mt-0">
+                        <Link
+                            href="/account/rewards"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-heritage-red px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-white transition-all shadow-xl hover:bg-heritage-gold hover:text-heritage-black active:scale-95"
+                        >
+                            Privilege Archives
                         </Link>
                     </div>
                 </div>

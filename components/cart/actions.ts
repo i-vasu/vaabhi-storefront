@@ -107,7 +107,7 @@ export async function createCartAndSetCookie() {
   (await cookies()).set('cartId', cart.id!);
 }
 
-export async function applyCouponCode(prevState: any, formData: FormData) {
+export async function applyCouponCode(prevState: any, formData: FormData): Promise<string> {
   const code = formData.get('code') as string;
   if (!code) return 'Code required';
 
