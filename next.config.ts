@@ -1,4 +1,22 @@
-export default {
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: true,
+  fallback(url) {
+    if (url.pathname.startsWith("/api")) return undefined;
+    return "/offline";
+  }
+});
+
+export default withPWA({
+  output: 'standalone',
   experimental: {
     ppr: true,
     inlineCss: true,
@@ -32,4 +50,4 @@ export default {
       }
     ];
   }
-};
+});

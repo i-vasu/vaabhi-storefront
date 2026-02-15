@@ -8,6 +8,7 @@ import { Product } from 'lib/backend';
 import SizeGuide from './size-guide';
 import { VariantSelector } from './variant-selector';
 import VirtualTryOn from './virtual-try-on';
+import { WhatsAppOrderButton } from './whatsapp-order-button';
 import { WishlistButton } from './wishlist-button';
 
 export function ProductDescription({ product }: { product: Product }) {
@@ -78,6 +79,7 @@ export function ProductDescription({ product }: { product: Product }) {
           </div>
           <WishlistButton product={product} />
         </div>
+        <WhatsAppOrderButton product={product} />
         <div className="mt-6 border-t border-neutral-100 dark:border-neutral-800 pt-6">
           <VirtualTryOn productImageUrl={product.featuredImage?.url} />
         </div>
